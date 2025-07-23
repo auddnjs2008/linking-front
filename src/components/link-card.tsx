@@ -38,7 +38,7 @@ export default function LinkCard({
           {description}
         </CardDescription>
       </CardHeader>
-      <CardFooter className="px-6 pb-6 pt-2">
+      <CardFooter className="px-6 pb-6 pt-2 flex justify-between">
         <a
           href={url}
           target="_blank"
@@ -47,10 +47,13 @@ export default function LinkCard({
         >
           See more
         </a>
-        <Avatar>
-          <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-          <AvatarFallback>CN</AvatarFallback>
-        </Avatar>
+        <div className="flex items-center gap-2">
+          <Avatar>
+            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+            <AvatarFallback>CN</AvatarFallback>
+          </Avatar>
+          <div>John Doe</div>
+        </div>
       </CardFooter>
     </Card>
   );
