@@ -6,6 +6,8 @@ import { createBrowserRouter } from "react-router-dom";
 import MyGroupPage from "@/pages/groups-me";
 import GroupDetailPage from "@/pages/group-detail";
 import LinkDetailPage from "@/pages/link-detail";
+import SignIn from "@/pages/signIn";
+import SignUp from "@/pages/signUp";
 
 export const router = createBrowserRouter([
   {
@@ -16,6 +18,7 @@ export const router = createBrowserRouter([
         path: "/",
         element: <Home />,
       },
+
       {
         path: "/links/:id",
         element: <LinkDetailPage />,
@@ -35,6 +38,19 @@ export const router = createBrowserRouter([
       {
         path: "/groups/me",
         element: <MyGroupPage />,
+      },
+    ],
+  },
+  {
+    path: "/auth",
+    children: [
+      {
+        path: "signin",
+        element: <SignIn />,
+      },
+      {
+        path: "signup",
+        element: <SignUp />,
       },
     ],
   },
