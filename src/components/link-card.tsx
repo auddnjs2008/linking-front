@@ -63,6 +63,7 @@ export default function LinkCard({
               variant="ghost"
               size="sm"
               className="text-gray-400 hover:text-gray-600 h-8 px-2"
+              onClick={(e) => e.stopPropagation()}
             >
               <EditIcon className="w-4 h-4" />
             </Button>
