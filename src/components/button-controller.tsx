@@ -1,7 +1,7 @@
 import { ArrowUpIcon, FilterIcon, GridIcon, PlusIcon } from "lucide-react";
 import { Button } from "./ui/button";
-import LinkCreateModalTrigger from "./link-create-modal";
-import GroupCreateModal from "./group-create-modal";
+import LinkModalTrigger from "./link-action-modal";
+import GroupActionModal from "./group-action-modal";
 
 export default function ButtonController({ type }: { type: "group" | "link" }) {
   return (
@@ -19,30 +19,24 @@ export default function ButtonController({ type }: { type: "group" | "link" }) {
       {/* 링크 생성 버튼 */}
 
       {type === "link" && (
-        <LinkCreateModalTrigger>
+        <LinkModalTrigger mode="create">
           <Button
             size="icon"
             className="w-12 h-12 rounded-full shadow-lg bg-black text-white hover:bg-gray-800"
-            onClick={() => {
-              /* 링크 생성 모달/페이지 */
-            }}
           >
             <PlusIcon className="w-5 h-5" />
           </Button>
-        </LinkCreateModalTrigger>
+        </LinkModalTrigger>
       )}
       {type === "group" && (
-        <GroupCreateModal>
+        <GroupActionModal>
           <Button
             size="icon"
             className="w-12 h-12 rounded-full shadow-lg bg-black text-white hover:bg-gray-800"
-            onClick={() => {
-              /* 링크 생성 모달/페이지 */
-            }}
           >
             <PlusIcon className="w-5 h-5" />
           </Button>
-        </GroupCreateModal>
+        </GroupActionModal>
       )}
 
       {/* 필터 버튼 */}

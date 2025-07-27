@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { StarIcon, EditIcon } from "lucide-react";
+import LinkActionModal from "./link-action-modal";
 
 type LinkCardProps = {
   id: number;
@@ -49,13 +50,23 @@ export default function LinkCard({
           >
             <StarIcon className="w-4 h-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-gray-400 hover:text-gray-600 h-8 px-2"
+          <LinkActionModal
+            mode="edit"
+            initialData={{
+              title: "수정 테스트다",
+              description: "나는 이 카드를 수정 할 것이다.",
+              url: "https://www.naver.com",
+              tags: ["design", "ui/ux", "next.js"],
+            }}
           >
-            <EditIcon className="w-4 h-4" />
-          </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-400 hover:text-gray-600 h-8 px-2"
+            >
+              <EditIcon className="w-4 h-4" />
+            </Button>
+          </LinkActionModal>
         </div>
       </div>
 

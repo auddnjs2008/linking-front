@@ -12,28 +12,59 @@ import {
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 
-type LinkCreateModalTriggerProps = {
-  children: React.ReactNode;
+type LinkData = {
+  title: string;
+  description: string;
+  url: string;
+  tags: string[];
 };
 
-export default function LinkCreateModalTrigger({
+type LinkActionModalProps = {
+  children: React.ReactNode;
+  mode: "create" | "edit";
+  initialData?: LinkData;
+  onSubmit?: (data: LinkData) => void;
+};
+
+export default function LinkActionModal({
   children,
-}: LinkCreateModalTriggerProps) {
-  const [tags, setTags] = useState<string[]>([]);
+  mode,
+  initialData,
+  onSubmit,
+}: LinkActionModalProps) {
+  const [formData, setFormData] = useState<LinkData>({
+    title: "",
+    description: "",
+    url: "",
+    tags: [],
+  });
   const [tagInput, setTagInput] = useState("");
 
+  // 초기 데이터가 있으면 폼에 설정
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
+
   const addTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()]);
+    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
+      setFormData((prev) => ({
+        ...prev,
+        tags: [...prev.tags, tagInput.trim()],
+      }));
       setTagInput("");
     }
   };
 
   const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
+    setFormData((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((tag) => tag !== tagToRemove),
+    }));
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -43,33 +74,61 @@ export default function LinkCreateModalTrigger({
     }
   };
 
+  const handleSubmit = () => {
+    onSubmit?.(formData);
+  };
+
+  const isEditMode = mode === "edit";
+  const title = isEditMode ? "Edit Link" : "Create Link";
+  const description = isEditMode
+    ? "Edit the link information."
+    : "Create a new link to share with others.";
+  const submitText = isEditMode ? "Update" : "Create";
+
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Create Link</DialogTitle>
-          <DialogDescription>
-            Create a new link to share with others.
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">
           <div className="grid flex-1 gap-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" />
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, title: e.target.value }))
+              }
+            />
           </div>
 
           <div className="grid flex-1 gap-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea id="description" className="h-32" />
+            <Textarea
+              id="description"
+              className="h-32"
+              value={formData.description}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
+            />
           </div>
 
           <div className="grid flex-1 gap-2">
             <Label htmlFor="link">Link</Label>
             <Input
               id="link"
-              defaultValue="https://ui.shadcn.com/docs/installation"
-              readOnly
+              value={formData.url}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, url: e.target.value }))
+              }
+              readOnly={isEditMode} // 수정 모드에서는 URL 변경 불가
             />
           </div>
 
@@ -94,9 +153,9 @@ export default function LinkCreateModalTrigger({
                 </Button>
               </div>
 
-              {tags.length > 0 && (
+              {formData.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {tags.map((tag, index) => (
+                  {formData.tags.map((tag, index) => (
                     <div
                       key={index}
                       className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
@@ -119,10 +178,10 @@ export default function LinkCreateModalTrigger({
         <DialogFooter>
           <DialogClose asChild>
             <Button type="button" variant="secondary">
-              Close
+              Cancel
             </Button>
           </DialogClose>
-          <Button>Create</Button>
+          <Button onClick={handleSubmit}>{submitText}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

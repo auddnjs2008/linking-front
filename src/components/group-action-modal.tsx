@@ -16,11 +16,11 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import LinkSummaryCard from "./link-summary-card";
 
-type GroupCreateModalProps = {
+type GroupActionModalProps = {
   children: React.ReactNode;
 };
 
-export default function GroupCreateModal({ children }: GroupCreateModalProps) {
+export default function GroupActionModal({ children }: GroupActionModalProps) {
   const [step, setStep] = useState(1);
   const [open, setOpen] = useState(false);
 
