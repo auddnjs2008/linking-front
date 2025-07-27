@@ -6,11 +6,11 @@ export default function Home() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {Array.from({ length: 10 }).map((_, index) => (
           <LinkCard
+            id={1}
             key={index}
             thumbnailUrl={`https://picsum.photos/200/300?random=${index}`}
             title="Link Title"
             description="This article provides an in-depth overview of the latest trends in UI/UX design, offering practical tips and real-world examples to inspire your next project."
-            url="https://www.google.com"
           />
         ))}
       </div>

@@ -9,8 +9,10 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { LinkIcon, StarIcon, EditIcon } from "lucide-react";
 import { Button } from "./ui/button";
+import { useNavigate } from "react-router-dom";
 
 type GroupCardProps = {
+  id: number;
   title: string;
   description: string;
   linkCount: number;
@@ -21,6 +23,7 @@ type GroupCardProps = {
 };
 
 export default function GroupCard({
+  id,
   title,
   description,
   linkCount,
@@ -29,6 +32,12 @@ export default function GroupCard({
   ownerInitials,
   ownerName,
 }: GroupCardProps) {
+  const navigate = useNavigate();
+
+  const handleViewGroup = () => {
+    navigate(`/groups/${id}`);
+  };
+
   return (
     <Card className="bg-white rounded-2xl shadow-lg max-w-xs flex flex-col items-stretch transition-shadow hover:shadow-xl p-0">
       <CardHeader className="pt-5 pb-2 px-6">
@@ -68,7 +77,7 @@ export default function GroupCard({
       </CardContent>
 
       <CardFooter className="px-6 pb-6 pt-2 flex justify-between">
-        <Button>View Group</Button>
+        <Button onClick={handleViewGroup}>View Group</Button>
         <div className="flex items-center gap-2">
           <Avatar className="w-6 h-6">
             <AvatarImage src={ownerAvatar} />

@@ -12,12 +12,37 @@ import {
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
+import { useState } from "react";
+import { X } from "lucide-react";
 
-type LinkCreateModalProps = {
+type LinkCreateModalTriggerProps = {
   children: React.ReactNode;
 };
 
-export default function LinkCreateModal({ children }: LinkCreateModalProps) {
+export default function LinkCreateModalTrigger({
+  children,
+}: LinkCreateModalTriggerProps) {
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+
+  const addTag = () => {
+    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addTag();
+    }
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -28,7 +53,7 @@ export default function LinkCreateModal({ children }: LinkCreateModalProps) {
             Create a new link to share with others.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col  gap-2">
+        <div className="flex flex-col gap-4">
           <div className="grid flex-1 gap-2">
             <Label htmlFor="title">Title</Label>
             <Input id="title" />
@@ -36,7 +61,7 @@ export default function LinkCreateModal({ children }: LinkCreateModalProps) {
 
           <div className="grid flex-1 gap-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea id="thumbnail" className="h-50" />
+            <Textarea id="description" className="h-32" />
           </div>
 
           <div className="grid flex-1 gap-2">
@@ -46,6 +71,49 @@ export default function LinkCreateModal({ children }: LinkCreateModalProps) {
               defaultValue="https://ui.shadcn.com/docs/installation"
               readOnly
             />
+          </div>
+
+          <div className="grid flex-1 gap-2">
+            <Label htmlFor="tags">Tags</Label>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  id="tags"
+                  placeholder="Enter a tag and press Enter"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addTag}
+                  disabled={!tagInput.trim()}
+                >
+                  Add
+                </Button>
+              </div>
+
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+                    >
+                      <span>#{tag}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="ml-1 hover:bg-blue-200 rounded-full p-0.5"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <DialogFooter>
