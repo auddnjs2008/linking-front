@@ -12,33 +12,61 @@ import { Separator } from "@/components/ui/separator";
 import { Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { z } from "zod";
+import { useSignUpMutation } from "@/hooks/rqhooks/auth/useSignUpMutation";
+import { ButtonSpinner } from "@/components/ui/spinner";
+
+type Inputs = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  agreeToTerms: boolean;
+};
+
+const schema = z
+  .object({
+    name: z.string().min(2, "이름은 2자 이상이어야 합니다"),
+    email: z.email("올바른 이메일 형식이 아닙니다"),
+    password: z.string().min(8, "비밀번호는 8자 이상이어야 합니다"),
+    confirmPassword: z.string(),
+    agreeToTerms: z
+      .boolean()
+      .refine((val) => val === true, "약관에 동의해야 합니다"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "비밀번호가 일치하지 않습니다",
+    path: ["confirmPassword"], // 에러를 confirmPassword 필드에 표시
+  });
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    agreeToTerms: false,
-  });
-  const navigate = useNavigate();
 
-  const handleSignUp = (e: React.FormEvent) => {
-    e.preventDefault();
-    // 회원가입 로직 구현
-    navigate("/");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<Inputs>({
+    resolver: zodResolver(schema),
+    mode: "onChange",
+  });
+
+  const { mutate, isPending } = useSignUpMutation();
+
+  const onSubmit = (data: Inputs) => {
+    if (!data.agreeToTerms) return;
+    mutate({
+      email: data.email,
+      password: data.password,
+      body: { name: data.name },
+    });
   };
 
-  const isPasswordMatch = formData.password === formData.confirmPassword;
-  const isFormValid =
-    formData.name &&
-    formData.email &&
-    formData.password &&
-    formData.confirmPassword &&
-    isPasswordMatch &&
-    formData.agreeToTerms;
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
@@ -65,7 +93,7 @@ export default function SignUp() {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            <form onSubmit={handleSignUp} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {/* 이름 입력 */}
               <div className="space-y-2">
                 <Label
@@ -80,14 +108,17 @@ export default function SignUp() {
                     id="name"
                     type="text"
                     placeholder="Enter your full name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, name: e.target.value }))
-                    }
-                    className="pl-10 h-12 border-gray-200 focus:border-gray-400 focus:ring-gray-400"
-                    required
+                    {...register("name")}
+                    className={`pl-10 h-12 border-gray-200 focus:border-gray-400 focus:ring-gray-400 ${
+                      errors.name
+                        ? "border-red-300 focus:border-red-400 focus:ring-red-400"
+                        : ""
+                    }`}
                   />
                 </div>
+                {errors.name && (
+                  <p className="text-red-500 text-sm">{errors.name.message}</p>
+                )}
               </div>
 
               {/* 이메일 입력 */}
@@ -104,17 +135,17 @@ export default function SignUp() {
                     id="email"
                     type="email"
                     placeholder="Enter your email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        email: e.target.value,
-                      }))
-                    }
-                    className="pl-10 h-12 border-gray-200 focus:border-gray-400 focus:ring-gray-400"
-                    required
+                    {...register("email")}
+                    className={`pl-10 h-12 border-gray-200 focus:border-gray-400 focus:ring-gray-400 ${
+                      errors.email
+                        ? "border-red-300 focus:border-red-400 focus:ring-red-400"
+                        : ""
+                    }`}
                   />
                 </div>
+                {errors.email && (
+                  <p className="text-red-500 text-sm">{errors.email.message}</p>
+                )}
               </div>
 
               {/* 비밀번호 입력 */}
@@ -131,15 +162,12 @@ export default function SignUp() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Create a password"
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        password: e.target.value,
-                      }))
-                    }
-                    className="pl-10 pr-10 h-12 border-gray-200 focus:border-gray-400 focus:ring-gray-400"
-                    required
+                    {...register("password")}
+                    className={`pl-10 pr-10 h-12 border-gray-200 focus:border-gray-400 focus:ring-gray-400 ${
+                      errors.password
+                        ? "border-red-300 focus:border-red-400 focus:ring-red-400"
+                        : ""
+                    }`}
                   />
                   <button
                     type="button"
@@ -153,6 +181,11 @@ export default function SignUp() {
                     )}
                   </button>
                 </div>
+                {errors.password && (
+                  <p className="text-red-500 text-sm">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
 
               {/* 비밀번호 확인 */}
@@ -169,19 +202,12 @@ export default function SignUp() {
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm your password"
-                    value={formData.confirmPassword}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        confirmPassword: e.target.value,
-                      }))
-                    }
+                    {...register("confirmPassword")}
                     className={`pl-10 pr-10 h-12 border-gray-200 focus:border-gray-400 focus:ring-gray-400 ${
-                      formData.confirmPassword && !isPasswordMatch
+                      errors.confirmPassword
                         ? "border-red-300 focus:border-red-400 focus:ring-red-400"
                         : ""
                     }`}
-                    required
                   />
                   <button
                     type="button"
@@ -195,60 +221,62 @@ export default function SignUp() {
                     )}
                   </button>
                 </div>
-                {formData.confirmPassword && !isPasswordMatch && (
-                  <p className="text-red-500 text-sm">Passwords do not match</p>
+                {errors.confirmPassword && (
+                  <p className="text-red-500 text-sm">
+                    {errors.confirmPassword.message}
+                  </p>
                 )}
               </div>
 
               {/* 약관 동의 */}
-              <div className="flex items-start space-x-3">
-                <input
-                  type="checkbox"
-                  id="agreeToTerms"
-                  checked={formData.agreeToTerms}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      agreeToTerms: e.target.checked,
-                    }))
-                  }
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1"
-                  required
-                />
-                <Label
-                  htmlFor="agreeToTerms"
-                  className="text-sm text-gray-600 leading-relaxed"
-                >
-                  <div className="flex-col items-center">
-                    <p>
-                      I agree to the
-                      <button
-                        type="button"
-                        className="text-blue-600 hover:text-blue-800 font-medium"
-                      >
-                        Terms of Service
-                      </button>
-                    </p>
-                    <p>
-                      and
-                      <button
-                        type="button"
-                        className="text-blue-600 hover:text-blue-800 font-medium"
-                      >
-                        Privacy Policy
-                      </button>
-                    </p>
-                  </div>
-                </Label>
+              <div className="space-y-2">
+                <div className="flex items-start space-x-3">
+                  <input
+                    type="checkbox"
+                    id="agreeToTerms"
+                    {...register("agreeToTerms")}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1"
+                  />
+                  <Label
+                    htmlFor="agreeToTerms"
+                    className="text-sm text-gray-600 leading-relaxed"
+                  >
+                    <div className="flex-col items-center">
+                      <p>
+                        I agree to the
+                        <button
+                          type="button"
+                          className="text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          Terms of Service
+                        </button>
+                      </p>
+                      <p>
+                        and
+                        <button
+                          type="button"
+                          className="text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          Privacy Policy
+                        </button>
+                      </p>
+                    </div>
+                  </Label>
+                </div>
+                {errors.agreeToTerms && (
+                  <p className="text-red-500 text-sm">
+                    {errors.agreeToTerms.message}
+                  </p>
+                )}
               </div>
 
               {/* 회원가입 버튼 */}
               <Button
                 type="submit"
-                disabled={!isFormValid}
+                disabled={!isValid || isPending}
                 className="w-full h-12 bg-black hover:bg-gray-800 text-white font-semibold rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
-                Create Account
+                {isPending ? <ButtonSpinner /> : "Create Account"}
               </Button>
             </form>
 

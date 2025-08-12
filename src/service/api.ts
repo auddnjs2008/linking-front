@@ -20,8 +20,10 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
-const apiInstance = axios.create({
-  baseURL: "http://localhost:3000",
+const loginUrl = import.meta.env.VITE_SERVICE_URL + "/auth/signin";
+
+export const apiInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
   headers: { "Content-Type": "application/json" },
 });
 
@@ -33,7 +35,7 @@ apiInstance.interceptors.request.use((config) => {
   } else {
     const refreshToken = localStorage.getItem("refresh_token");
     if (!refreshToken) {
-      window.location.href = "http://localhost:3000/auth/signin";
+      window.location.href = loginUrl;
     }
   }
 
@@ -66,7 +68,7 @@ apiInstance.interceptors.response.use(undefined, async (error) => {
       try {
         // 리프레시 토큰으로 새로운 액세스 토큰 요청
         const response = await axios.post(
-          "http://localhost:3000/auth/refresh",
+          import.meta.env.VITE_API_URL + "/auth/refresh",
           {
             refreshToken,
           }
@@ -92,7 +94,7 @@ apiInstance.interceptors.response.use(undefined, async (error) => {
         // 리프레시 토큰도 만료된 경우 로그인 페이지로 이동
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
-        window.location.href = "http://localhost:3000/auth/signin";
+        window.location.href = loginUrl;
         return Promise.reject(refreshError);
       } finally {
         // 리프레시 완료 (성공/실패 상관없이)
@@ -101,7 +103,7 @@ apiInstance.interceptors.response.use(undefined, async (error) => {
     } else {
       // 리프레시 토큰이 없는 경우 로그인 페이지로 이동
       localStorage.removeItem("access_token");
-      window.location.href = "http://localhost:3000/auth/signin";
+      window.location.href = loginUrl;
       return Promise.reject(error);
     }
   }
