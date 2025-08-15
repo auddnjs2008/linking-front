@@ -14,7 +14,7 @@ export const useSignInMutation = () => {
       const { refreshToken, accessToken } = data;
       setAccessToken(accessToken);
       setRefreshToken(refreshToken);
-      setTimeout(() => navigator("/"), 500);
+      navigator("/");
     },
   });
 };

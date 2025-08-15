@@ -9,11 +9,16 @@ type ReqSignUp = {
 };
 
 type ResSignUp = {
-  accessToken: string;
-  refreshToken: string;
-  userId: number;
-  userName: string;
-  userEmail: string;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    loginType: string;
+    profile: string;
+    createdAt: string;
+    updatedAt: string;
+    version: number;
+  };
 };
 
 export const signup = async (req: ReqSignUp) => {
