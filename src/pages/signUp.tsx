@@ -11,7 +11,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -66,7 +65,10 @@ export default function SignUp() {
     });
   };
 
-  const navigate = useNavigate();
+  const handleGoogleSignUp = () => {
+    const url = import.meta.env.VITE_API_URL + "/auth/google";
+    window.location.href = url;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
@@ -292,6 +294,7 @@ export default function SignUp() {
             <Button
               type="button"
               variant="outline"
+              onClick={handleGoogleSignUp}
               className="w-full h-12 border-gray-200 hover:bg-gray-50"
             >
               <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
@@ -323,7 +326,11 @@ export default function SignUp() {
             Already have an account?{" "}
             <button
               type="button"
-              onClick={() => navigate("/auth/signin")}
+              onClick={() => {
+                // Google OAuth 시작
+                const googleAuthUrl = `${import.meta.env.VITE_API_URL}//google`;
+                window.location.href = googleAuthUrl;
+              }}
               className="text-blue-600 hover:text-blue-800 font-medium"
             >
               Sign in

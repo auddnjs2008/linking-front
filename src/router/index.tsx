@@ -8,6 +8,8 @@ import GroupDetailPage from "@/pages/group-detail";
 import LinkDetailPage from "@/pages/link-detail";
 import SignIn from "@/pages/signIn";
 import SignUp from "@/pages/signUp";
+import AuthSuccess from "@/pages/auth-success";
+import { AuthFail } from "@/pages/auth-fail";
 
 export const router = createBrowserRouter([
   {
@@ -51,6 +53,14 @@ export const router = createBrowserRouter([
       {
         path: "signup",
         element: <SignUp />,
+      },
+      {
+        path: "success",
+        element: <AuthSuccess />,
+      },
+      {
+        path: "fail",
+        element: <AuthFail />,
       },
     ],
   },

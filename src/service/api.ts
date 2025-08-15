@@ -1,3 +1,10 @@
+import {
+  clearAuthTokens,
+  getAccessToken,
+  getRefreshToken,
+  removeCookie,
+  setAccessToken,
+} from "@/utils/token";
 import axios from "axios";
 
 // 리프레시 토큰 요청 중복 방지를 위한 플래그
@@ -28,12 +35,12 @@ export const apiInstance = axios.create({
 });
 
 apiInstance.interceptors.request.use((config) => {
-  const accessToken = localStorage.getItem("access_token");
+  const accessToken = getAccessToken();
 
   if (accessToken) {
     config.headers.set("Authorization", `Bearer ${accessToken}`);
   } else {
-    const refreshToken = localStorage.getItem("refresh_token");
+    const refreshToken = getRefreshToken();
     if (!refreshToken) {
       window.location.href = loginUrl;
     }
@@ -44,7 +51,7 @@ apiInstance.interceptors.request.use((config) => {
 
 apiInstance.interceptors.response.use(undefined, async (error) => {
   if (error.response?.status === 401) {
-    const refreshToken = localStorage.getItem("refresh_token");
+    const refreshToken = getRefreshToken();
 
     if (refreshToken) {
       // 이미 리프레시가 진행 중인 경우
@@ -77,7 +84,7 @@ apiInstance.interceptors.response.use(undefined, async (error) => {
         const { accessToken: newAccessToken } = response.data;
 
         // 새로운 액세스 토큰 저장
-        localStorage.setItem("access_token", newAccessToken);
+        setAccessToken(newAccessToken);
 
         // 대기 중인 모든 요청들을 성공으로 처리
         processQueue(null, newAccessToken);
@@ -92,8 +99,7 @@ apiInstance.interceptors.response.use(undefined, async (error) => {
         processQueue(refreshError, null);
 
         // 리프레시 토큰도 만료된 경우 로그인 페이지로 이동
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
+        clearAuthTokens();
         window.location.href = loginUrl;
         return Promise.reject(refreshError);
       } finally {
@@ -102,7 +108,7 @@ apiInstance.interceptors.response.use(undefined, async (error) => {
       }
     } else {
       // 리프레시 토큰이 없는 경우 로그인 페이지로 이동
-      localStorage.removeItem("access_token");
+      removeCookie("accessToken");
       window.location.href = loginUrl;
       return Promise.reject(error);
     }

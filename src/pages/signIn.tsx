@@ -11,18 +11,30 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { useSignInMutation } from "@/hooks/rqhooks/auth/useSignInMutation";
 import { useNavigate } from "react-router-dom";
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const navigate = useNavigate();
+
+  const { mutate } = useSignInMutation();
 
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
     // 로그인 로직 구현
-    navigate("/");
+    mutate({
+      email,
+      password,
+    });
+  };
+
+  const handleGoogleSignIn = () => {
+    const url = import.meta.env.VITE_API_URL + "/auth/google";
+    window.location.href = url;
   };
 
   return (
@@ -149,6 +161,7 @@ export default function SignIn() {
               <Button
                 type="button"
                 variant="outline"
+                onClick={handleGoogleSignIn}
                 className="w-full h-12 border-gray-200 hover:bg-gray-50"
               >
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
