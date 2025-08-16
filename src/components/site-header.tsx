@@ -1,11 +1,15 @@
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useLocation } from "react-router-dom";
 import { menuItems } from "./app-sidebar";
+import { useMeQuery } from "@/hooks/rqhooks/user/useMeQuery";
+import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
+import { AvatarImage } from "./ui/avatar";
 
 export function SiteHeader() {
   const pathname = useLocation();
+  const { data } = useMeQuery();
+  console.log(data, "data");
 
   const title = menuItems.find((item) => item.url === pathname.pathname)?.title;
 
@@ -18,17 +22,16 @@ export function SiteHeader() {
           className="mx-2 data-[orientation=vertical]:h-4"
         />
         <h1 className="text-base font-medium">{title}</h1>
-        <div className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-            <a
-              href="https://github.com/shadcn-ui/ui/tree/main/apps/v4/app/(examples)/dashboard"
-              rel="noopener noreferrer"
-              target="_blank"
-              className="dark:text-foreground"
-            >
-              GitHub
-            </a>
-          </Button>
+        <div className="ml-auto flex gap-2 items-center rounded-sm hover:bg-gray-100 hover:cursor-pointer p-2">
+          <Avatar>
+            <AvatarImage
+              src={data?.profile ?? "https://github.com/shadcn.png"}
+              alt="@shadcn"
+              className="size-7 rounded-full overflow-hidden"
+            />
+            <AvatarFallback>{data?.name}</AvatarFallback>
+          </Avatar>
+          <span>{data?.name}</span>
         </div>
       </div>
     </header>

@@ -76,8 +76,11 @@ apiInstance.interceptors.response.use(undefined, async (error) => {
         // 리프레시 토큰으로 새로운 액세스 토큰 요청
         const response = await axios.post(
           import.meta.env.VITE_API_URL + "/auth/refresh",
+          {},
           {
-            refreshToken,
+            headers: {
+              Authorization: `Bearer ${refreshToken}`,
+            },
           }
         );
 
