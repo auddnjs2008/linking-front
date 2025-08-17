@@ -9,7 +9,6 @@ import { AvatarImage } from "./ui/avatar";
 export function SiteHeader() {
   const pathname = useLocation();
   const { data } = useMeQuery();
-  console.log(data, "data");
 
   const title = menuItems.find((item) => item.url === pathname.pathname)?.title;
 
