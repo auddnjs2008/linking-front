@@ -118,6 +118,7 @@ export default function LinkMe() {
             </Button>
           </div>
         </div>
+        <ButtonController type="link" />
       </div>
     );
   }

@@ -12,21 +12,31 @@ import {
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { X } from "lucide-react";
+import { useForm } from "react-hook-form";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type LinkData = {
+type Inputs = {
   title: string;
   description: string;
   url: string;
   tags: string[];
 };
 
+const schema = z.object({
+  title: z.string().min(5, "타이틀은 5자 이상이어야 합니다."),
+  description: z.string(),
+  url: z.url(),
+  tags: z.array(z.string()),
+});
+
 type LinkActionModalProps = {
   children: React.ReactNode;
   mode: "create" | "edit";
-  initialData?: LinkData;
-  onSubmit?: (data: LinkData) => void;
+  initialData?: Inputs;
+  onSubmit?: (data: Inputs) => void;
 };
 
 export default function LinkActionModal({
@@ -35,36 +45,33 @@ export default function LinkActionModal({
   initialData,
   onSubmit,
 }: LinkActionModalProps) {
-  const [formData, setFormData] = useState<LinkData>({
-    title: "",
-    description: "",
-    url: "",
-    tags: [],
+  const { register, handleSubmit, watch, setValue } = useForm<Inputs>({
+    resolver: zodResolver(schema),
+    mode: "onChange",
+    defaultValues: initialData || {
+      title: "",
+      url: "",
+      description: "",
+      tags: [],
+    },
   });
+
   const [tagInput, setTagInput] = useState("");
 
-  // 초기 데이터가 있으면 폼에 설정
-  useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
-    }
-  }, [initialData]);
-
   const addTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        tags: [...prev.tags, tagInput.trim()],
-      }));
+    const currentTags = watch("tags");
+    if (tagInput.trim() && !currentTags.includes(tagInput.trim())) {
+      setValue("tags", [...currentTags, tagInput.trim()]);
       setTagInput("");
     }
   };
 
-  const removeTag = (tagToRemove: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((tag) => tag !== tagToRemove),
-    }));
+  const removeTag = (index: number) => {
+    const currentTags = watch("tags");
+    setValue(
+      "tags",
+      currentTags.filter((_, i) => i !== index)
+    );
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -74,8 +81,8 @@ export default function LinkActionModal({
     }
   };
 
-  const handleSubmit = () => {
-    onSubmit?.(formData);
+  const handleFormSubmit = (data: Inputs) => {
+    onSubmit?.(data);
   };
 
   const isEditMode = mode === "edit";
@@ -85,6 +92,8 @@ export default function LinkActionModal({
     : "Create a new link to share with others.";
   const submitText = isEditMode ? "Update" : "Create";
 
+  const currentTags = watch("tags");
+
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -93,96 +102,79 @@ export default function LinkActionModal({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-4">
-          <div className="grid flex-1 gap-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, title: e.target.value }))
-              }
-            />
-          </div>
+        <form onSubmit={handleSubmit(handleFormSubmit)}>
+          <div className="flex flex-col gap-4">
+            <div className="grid flex-1 gap-2">
+              <Label htmlFor="title">Title</Label>
+              <Input id="title" {...register("title")} />
+            </div>
 
-          <div className="grid flex-1 gap-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              className="h-32"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
-              }
-            />
-          </div>
+            <div className="grid flex-1 gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                className="h-32"
+                {...register("description")}
+              />
+            </div>
 
-          <div className="grid flex-1 gap-2">
-            <Label htmlFor="link">Link</Label>
-            <Input
-              id="link"
-              value={formData.url}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, url: e.target.value }))
-              }
-              readOnly={isEditMode} // 수정 모드에서는 URL 변경 불가
-            />
-          </div>
+            <div className="grid flex-1 gap-2">
+              <Label htmlFor="link">Link</Label>
+              <Input id="link" {...register("url")} readOnly={isEditMode} />
+            </div>
 
-          <div className="grid flex-1 gap-2">
-            <Label htmlFor="tags">Tags</Label>
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                <Input
-                  id="tags"
-                  placeholder="Enter a tag and press Enter"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={addTag}
-                  disabled={!tagInput.trim()}
-                >
-                  Add
-                </Button>
-              </div>
-
-              {formData.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {formData.tags.map((tag, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
-                    >
-                      <span>#{tag}</span>
-                      <button
-                        type="button"
-                        onClick={() => removeTag(tag)}
-                        className="ml-1 hover:bg-blue-200 rounded-full p-0.5"
-                      >
-                        <X size={12} />
-                      </button>
-                    </div>
-                  ))}
+            <div className="grid flex-1 gap-2">
+              <Label htmlFor="tags">Tags</Label>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    id="tags"
+                    placeholder="Enter a tag and press Enter"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addTag}
+                    disabled={!tagInput.trim()}
+                  >
+                    Add
+                  </Button>
                 </div>
-              )}
+
+                {currentTags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {currentTags.map((tag, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+                      >
+                        <span>#{tag}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeTag(index)}
+                          className="ml-1 hover:bg-blue-200 rounded-full p-0.5"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="secondary">
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button onClick={handleSubmit}>{submitText}</Button>
-        </DialogFooter>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button type="submit">{submitText}</Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
