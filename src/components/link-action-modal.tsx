@@ -7,7 +7,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -17,32 +16,37 @@ import { X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { InlineSpinner } from "./ui/spinner";
 
 type Inputs = {
   title: string;
   description: string;
-  url: string;
+  linkUrl: string;
   tags: string[];
 };
 
 const schema = z.object({
   title: z.string().min(5, "타이틀은 5자 이상이어야 합니다."),
   description: z.string(),
-  url: z.url(),
+  linkUrl: z.url(),
   tags: z.array(z.string()),
 });
 
 type LinkActionModalProps = {
-  children: React.ReactNode;
   mode: "create" | "edit";
+  open: boolean;
+  handleClose: () => void;
   initialData?: Inputs;
+  isPending?: boolean;
   onSubmit?: (data: Inputs) => void;
 };
 
 export default function LinkActionModal({
-  children,
   mode,
+  open,
+  handleClose,
   initialData,
+  isPending = false,
   onSubmit,
 }: LinkActionModalProps) {
   const { register, handleSubmit, watch, setValue } = useForm<Inputs>({
@@ -50,7 +54,7 @@ export default function LinkActionModal({
     mode: "onChange",
     defaultValues: initialData || {
       title: "",
-      url: "",
+      linkUrl: "",
       description: "",
       tags: [],
     },
@@ -83,6 +87,7 @@ export default function LinkActionModal({
 
   const handleFormSubmit = (data: Inputs) => {
     onSubmit?.(data);
+    handleClose();
   };
 
   const isEditMode = mode === "edit";
@@ -95,8 +100,7 @@ export default function LinkActionModal({
   const currentTags = watch("tags");
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={open}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -120,7 +124,7 @@ export default function LinkActionModal({
 
             <div className="grid flex-1 gap-2">
               <Label htmlFor="link">Link</Label>
-              <Input id="link" {...register("url")} readOnly={isEditMode} />
+              <Input id="link" {...register("linkUrl")} readOnly={isEditMode} />
             </div>
 
             <div className="grid flex-1 gap-2">
@@ -172,7 +176,10 @@ export default function LinkActionModal({
                 Cancel
               </Button>
             </DialogClose>
-            <Button type="submit">{submitText}</Button>
+            <Button type="submit" disabled={isPending}>
+              {isPending && <InlineSpinner />}
+              {submitText}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

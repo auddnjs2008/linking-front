@@ -9,14 +9,18 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import { StarIcon, EditIcon } from "lucide-react";
-import LinkActionModal from "./link-action-modal";
+import { EditIcon, BookmarkPlusIcon, BookmarkCheckIcon } from "lucide-react";
+import type { User } from "@/types/user";
+import { useBookmarkMutation } from "@/hooks/rqhooks/link/useBookmarkMutation";
+import { useUnBookmarkMutation } from "@/hooks/rqhooks/link/useUnBookmarkMutation";
 
 type LinkCardProps = {
   id: number;
   thumbnailUrl: string;
   title: string;
   description: string;
+  author: User;
+  isBookmarked: boolean;
 };
 
 export default function LinkCard({
@@ -24,10 +28,22 @@ export default function LinkCard({
   thumbnailUrl,
   title,
   description,
+  author,
+  isBookmarked,
 }: LinkCardProps) {
   const navigate = useNavigate();
   const handleSeeMore = () => {
     navigate(`/links/${id}`);
+  };
+
+  const { mutate: bookmark } = useBookmarkMutation();
+  const { mutate: unbookmark } = useUnBookmarkMutation();
+
+  const handleBookmark = () => {
+    bookmark({ id });
+  };
+  const handleUnBookmark = () => {
+    unbookmark({ id });
   };
 
   return (
@@ -47,27 +63,32 @@ export default function LinkCard({
             variant="outline"
             size="sm"
             className="text-gray-400 hover:text-gray-600 h-8 px-2"
+            onClick={!isBookmarked ? handleBookmark : handleUnBookmark}
           >
-            <StarIcon className="w-4 h-4" />
+            {!isBookmarked ? (
+              <BookmarkPlusIcon className="size-4 text-red-400" />
+            ) : (
+              <BookmarkCheckIcon className="size-4 text-green-400" />
+            )}
           </Button>
-          <LinkActionModal
+          {/* <LinkActionModal
             mode="edit"
             initialData={{
               title: "수정 테스트다",
               description: "나는 이 카드를 수정 할 것이다.",
-              url: "https://www.naver.com",
+              linkUrl: "https://www.naver.com",
               tags: ["design", "ui/ux", "next.js"],
             }}
+          > */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-gray-400 hover:text-gray-600 h-8 px-2"
+            onClick={(e) => e.stopPropagation()}
           >
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-gray-400 hover:text-gray-600 h-8 px-2"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <EditIcon className="w-4 h-4" />
-            </Button>
-          </LinkActionModal>
+            <EditIcon className="w-4 h-4" />
+          </Button>
+          {/* </LinkActionModal> */}
         </div>
       </div>
 
@@ -83,10 +104,10 @@ export default function LinkCard({
         <Button onClick={handleSeeMore}>See more</Button>
         <div className="flex items-center gap-2">
           <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-            <AvatarFallback>CN</AvatarFallback>
+            <AvatarImage src={author.profile} alt="@shadcn" />
+            <AvatarFallback>{author.name}</AvatarFallback>
           </Avatar>
-          <div>John Doe</div>
+          <div>{author.name}</div>
         </div>
       </CardFooter>
     </Card>

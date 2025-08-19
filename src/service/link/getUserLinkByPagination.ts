@@ -1,3 +1,4 @@
+import type { User } from "@/types/user";
 import { apiInstance } from "../api";
 
 type ReqGetUserLinkByPagination = {
@@ -13,11 +14,14 @@ type ResGetuserLinkByPagination = {
   data: {
     id: number;
     title: string;
-    url: string;
+    linkUrl: string;
+    thumbnail: string;
     description: string;
     creatorId: number;
     createdAt: string;
     updatedAt: string;
+    isBookmarked: boolean;
+    author: User;
   }[];
   nextCursor: number;
   prevCursor: number;

@@ -1,25 +1,38 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useParams } from "react-router-dom";
+import { useLinkDetailQuery } from "@/hooks/rqhooks/link/useLinkDetailQuery";
+import { useBookmarkMutation } from "@/hooks/rqhooks/link/useBookmarkMutation";
+import { useUnBookmarkMutation } from "@/hooks/rqhooks/link/useUnBookmarkMutation";
 
 export default function LinkDetailPage() {
-  // 임시 데이터 - 실제로는 props나 API에서 받아올 데이터
-  const linkData = {
-    id: 1,
-    title: "The Complete Guide to Modern UI/UX Design Principles",
-    description:
-      "This comprehensive guide covers all the essential principles of modern UI/UX design, from user research and wireframing to prototyping and user testing. Learn how to create intuitive, accessible, and visually appealing digital experiences that users love.",
-    thumbnailUrl: "https://picsum.photos/800/400?random=1",
-    url: "https://example.com/design-guide",
-    author: {
-      name: "Sarah Johnson",
-      avatar: "https://github.com/shadcn.png",
-    },
-    createdAt: "2024-01-15",
-    tags: ["UI/UX", "Design", "Web Design", "User Experience"],
-    readTime: "8 min read",
-    category: "Design",
+  const params = useParams<{ id: string }>();
+  const id = params.id ? parseInt(params.id, 10) : null;
+
+  const { data: linkData } = useLinkDetailQuery(id || -1);
+  const { mutate: bookmark } = useBookmarkMutation();
+  const { mutate: unbookmark } = useUnBookmarkMutation();
+
+  const handleBookmark = () => {
+    if (!id) return;
+    bookmark({ id });
   };
+
+  const handleUnBookmark = () => {
+    if (!id) return;
+    unbookmark({ id });
+  };
+
+  if (!id) {
+    return (
+      <div className="p-6 text-center">
+        <h2 className="text-xl font-semibold text-red-600">
+          링크 ID가 필요합니다
+        </h2>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 h-full flex flex-col w-full max-w-6xl mx-auto">
@@ -41,22 +54,22 @@ export default function LinkDetailPage() {
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-                {linkData.category}
+                {linkData?.tags[0]}
               </span>
-              <span className="text-gray-500 text-sm">{linkData.readTime}</span>
+              <span className="text-gray-500 text-sm">linkData.readTime</span>
             </div>
 
             <h1 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
-              {linkData.title}
+              {linkData?.title}
             </h1>
 
             <p className="text-gray-600 text-lg leading-relaxed mb-6">
-              {linkData.description}
+              {linkData?.description}
             </p>
 
             {/* 태그 */}
             <div className="flex flex-wrap gap-2 mb-6">
-              {linkData.tags.map((tag, index) => (
+              {linkData?.tags.map((tag, index) => (
                 <span
                   key={index}
                   className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
@@ -70,8 +83,8 @@ export default function LinkDetailPage() {
           {/* 썸네일 이미지 */}
           <div className="mb-8">
             <img
-              src={linkData.thumbnailUrl}
-              alt={linkData.title}
+              src={linkData?.thumbnail}
+              alt={linkData?.title}
               className="w-full h-64 object-cover rounded-xl shadow-lg"
             />
           </div>
@@ -97,7 +110,7 @@ export default function LinkDetailPage() {
 
                 <div className="flex justify-center">
                   <Button
-                    onClick={() => window.open(linkData.url, "_blank")}
+                    onClick={() => window.open(linkData?.linkUrl, "_blank")}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     Open External Link
@@ -120,16 +133,16 @@ export default function LinkDetailPage() {
                 <div className="flex items-center gap-3">
                   <Avatar className="w-12 h-12">
                     <AvatarImage
-                      src={linkData.author.avatar}
-                      alt={linkData.author.name}
+                      src={linkData?.user.profile}
+                      alt={linkData?.user.name}
                     />
                     <AvatarFallback>
-                      {linkData.author.name.charAt(0)}
+                      {linkData?.user.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <div className="font-medium text-gray-900">
-                      {linkData.author.name}
+                      {linkData?.user.name}
                     </div>
                     <div className="text-sm text-gray-500">Design Expert</div>
                   </div>
@@ -147,15 +160,17 @@ export default function LinkDetailPage() {
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Added</span>
-                  <span className="font-medium">{linkData.createdAt}</span>
+                  <span className="font-medium">
+                    {linkData?.createdAt.split("T")[0]}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Read time</span>
-                  <span className="font-medium">{linkData.readTime}</span>
+                  <span className="font-medium">"linkData.readTime"</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Category</span>
-                  <span className="font-medium">{linkData.category}</span>
+                  <span className="font-medium">{linkData?.tags[0]}</span>
                 </div>
               </CardContent>
             </Card>
@@ -165,7 +180,7 @@ export default function LinkDetailPage() {
               <CardContent className="pt-6">
                 <div className="space-y-3">
                   <Button
-                    onClick={() => window.open(linkData.url, "_blank")}
+                    onClick={() => window.open(linkData?.linkUrl, "_blank")}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     Visit External Link
@@ -173,8 +188,16 @@ export default function LinkDetailPage() {
                   <Button variant="outline" className="w-full">
                     Share Link
                   </Button>
-                  <Button variant="outline" className="w-full">
-                    Add to Bookmarks
+                  <Button
+                    onClick={
+                      linkData?.isBookmarked ? handleUnBookmark : handleBookmark
+                    }
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {linkData?.isBookmarked
+                      ? "Remove to Bookmarks"
+                      : "Add to Bookmarks"}
                   </Button>
                 </div>
               </CardContent>

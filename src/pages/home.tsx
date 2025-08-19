@@ -81,9 +81,14 @@ export default function Home() {
           <LinkCard
             key={link.id}
             id={link.id}
-            thumbnailUrl={`https://picsum.photos/200/300?random=${link.id}`}
+            thumbnailUrl={
+              link.thumbnail ??
+              `https://picsum.photos/200/300?random=${link.id}`
+            }
             title={link.title}
             description={link.description}
+            author={link.author}
+            isBookmarked={link.isBookmarked}
           />
         ))}
 

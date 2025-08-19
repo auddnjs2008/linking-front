@@ -19,4 +19,6 @@ export const RQlinkKey = {
       take,
       order,
     ] as const,
+
+  linkDetail: (id: number) => ["link", id] as const,
 };
