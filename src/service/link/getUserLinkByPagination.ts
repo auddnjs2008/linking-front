@@ -22,6 +22,7 @@ type ResGetuserLinkByPagination = {
     updatedAt: string;
     isBookmarked: boolean;
     author: User;
+    tags: string[];
   }[];
   nextCursor: number;
   prevCursor: number;

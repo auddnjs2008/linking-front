@@ -13,10 +13,18 @@ import { EditIcon, BookmarkPlusIcon, BookmarkCheckIcon } from "lucide-react";
 import type { User } from "@/types/user";
 import { useBookmarkMutation } from "@/hooks/rqhooks/link/useBookmarkMutation";
 import { useUnBookmarkMutation } from "@/hooks/rqhooks/link/useUnBookmarkMutation";
+import { useMeQuery } from "@/hooks/rqhooks/user/useMeQuery";
+import LinkActionModal from "./link-action-modal";
+import { useState } from "react";
+import { useUpdateLinkMutation } from "@/hooks/rqhooks/link/useUpdateLinkMutation";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 type LinkCardProps = {
   id: number;
   thumbnailUrl: string;
+  linkUrl: string;
+  tags: string[];
   title: string;
   description: string;
   author: User;
@@ -28,6 +36,8 @@ export default function LinkCard({
   thumbnailUrl,
   title,
   description,
+  linkUrl,
+  tags,
   author,
   isBookmarked,
 }: LinkCardProps) {
@@ -36,8 +46,17 @@ export default function LinkCard({
     navigate(`/links/${id}`);
   };
 
+  const queryClient = useQueryClient();
+  const { data: currentUser } = useMeQuery();
   const { mutate: bookmark } = useBookmarkMutation();
   const { mutate: unbookmark } = useUnBookmarkMutation();
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
+  const { mutate: editLink, isPending } = useUpdateLinkMutation(() => {
+    setEditModalOpen(false);
+    toast.success("업데이트에 성공하였습니다.");
+    queryClient.invalidateQueries({ queryKey: ["link", "cursor-pagination"] });
+  });
 
   const handleBookmark = () => {
     bookmark({ id });
@@ -80,14 +99,18 @@ export default function LinkCard({
               tags: ["design", "ui/ux", "next.js"],
             }}
           > */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-gray-400 hover:text-gray-600 h-8 px-2"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <EditIcon className="w-4 h-4" />
-          </Button>
+          {author.id === currentUser?.id && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-400 hover:text-gray-600 h-8 px-2"
+              onClick={() => {
+                setEditModalOpen(true);
+              }}
+            >
+              <EditIcon className="w-4 h-4" />
+            </Button>
+          )}
           {/* </LinkActionModal> */}
         </div>
       </div>
@@ -110,6 +133,21 @@ export default function LinkCard({
           <div>{author.name}</div>
         </div>
       </CardFooter>
+      <LinkActionModal
+        open={editModalOpen}
+        handleClose={() => setEditModalOpen(false)}
+        mode="edit"
+        initialData={{
+          title,
+          description,
+          linkUrl,
+          tags,
+        }}
+        onSubmit={(input) => {
+          editLink({ id, body: input });
+        }}
+        isPending={isPending}
+      />
     </Card>
   );
 }

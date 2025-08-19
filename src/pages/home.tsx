@@ -89,6 +89,8 @@ export default function Home() {
             description={link.description}
             author={link.author}
             isBookmarked={link.isBookmarked}
+            linkUrl={link.linkUrl}
+            tags={link.tags}
           />
         ))}
 

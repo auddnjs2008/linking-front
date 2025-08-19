@@ -27,9 +27,29 @@ type Inputs = {
 
 const schema = z.object({
   title: z.string().min(5, "타이틀은 5자 이상이어야 합니다."),
-  description: z.string(),
-  linkUrl: z.url(),
-  tags: z.array(z.string()),
+  description: z.string().min(10, "설명은 10자 이상이어야 합니다."),
+  linkUrl: z
+    .string()
+    .min(1, "링크 URL을 입력해주세요.")
+    .refine((url) => {
+      try {
+        new URL(url);
+        return true;
+      } catch {
+        return false;
+      }
+    }, "올바른 URL 형식을 입력해주세요. (예: https://example.com)")
+    .refine(
+      (url) => url.startsWith("http://") || url.startsWith("https://"),
+      "http:// 또는 https://로 시작하는 URL을 입력해주세요."
+    ),
+  tags: z
+    .array(z.string().min(1, "태그는 1자 이상이어야 합니다."))
+    .max(10, "태그는 최대 10개까지 추가할 수 있습니다.")
+    .refine(
+      (tags) => new Set(tags).size === tags.length,
+      "중복된 태그는 사용할 수 없습니다."
+    ),
 });
 
 type LinkActionModalProps = {
@@ -49,7 +69,13 @@ export default function LinkActionModal({
   isPending = false,
   onSubmit,
 }: LinkActionModalProps) {
-  const { register, handleSubmit, watch, setValue } = useForm<Inputs>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<Inputs>({
     resolver: zodResolver(schema),
     mode: "onChange",
     defaultValues: initialData || {
@@ -64,9 +90,23 @@ export default function LinkActionModal({
 
   const addTag = () => {
     const currentTags = watch("tags");
-    if (tagInput.trim() && !currentTags.includes(tagInput.trim())) {
-      setValue("tags", [...currentTags, tagInput.trim()]);
+    const trimmedTag = tagInput.trim();
+
+    if (trimmedTag && !currentTags.includes(trimmedTag)) {
+      if (currentTags.length >= 10) {
+        alert("태그는 최대 10개까지 추가할 수 있습니다.");
+        return;
+      }
+
+      if (trimmedTag.length < 1) {
+        alert("태그는 1자 이상이어야 합니다.");
+        return;
+      }
+
+      setValue("tags", [...currentTags, trimmedTag]);
       setTagInput("");
+    } else if (currentTags.includes(trimmedTag)) {
+      alert("이미 존재하는 태그입니다.");
     }
   };
 
@@ -101,7 +141,7 @@ export default function LinkActionModal({
 
   return (
     <Dialog open={open}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent onCloseButton={handleClose} className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -111,6 +151,9 @@ export default function LinkActionModal({
             <div className="grid flex-1 gap-2">
               <Label htmlFor="title">Title</Label>
               <Input id="title" {...register("title")} />
+              {errors.title && (
+                <p className="text-red-500 text-sm">{errors.title.message}</p>
+              )}
             </div>
 
             <div className="grid flex-1 gap-2">
@@ -120,11 +163,23 @@ export default function LinkActionModal({
                 className="h-32"
                 {...register("description")}
               />
+              {errors.description && (
+                <p className="text-red-500 text-sm">
+                  {errors.description.message}
+                </p>
+              )}
             </div>
 
             <div className="grid flex-1 gap-2">
               <Label htmlFor="link">Link</Label>
-              <Input id="link" {...register("linkUrl")} readOnly={isEditMode} />
+              <Input
+                id="link"
+                {...register("linkUrl")}
+                placeholder="https://example.com"
+              />
+              {errors.linkUrl && (
+                <p className="text-red-500 text-sm">{errors.linkUrl.message}</p>
+              )}
             </div>
 
             <div className="grid flex-1 gap-2">
@@ -137,16 +192,23 @@ export default function LinkActionModal({
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyPress={handleKeyPress}
+                    disabled={currentTags.length >= 10}
                   />
                   <Button
                     type="button"
                     variant="outline"
                     onClick={addTag}
-                    disabled={!tagInput.trim()}
+                    disabled={!tagInput.trim() || currentTags.length >= 10}
                   >
                     Add
                   </Button>
                 </div>
+
+                {currentTags.length >= 10 && (
+                  <p className="text-amber-600 text-sm">
+                    태그는 최대 10개까지 추가할 수 있습니다.
+                  </p>
+                )}
 
                 {currentTags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
@@ -168,11 +230,14 @@ export default function LinkActionModal({
                   </div>
                 )}
               </div>
+              {errors.tags && (
+                <p className="text-red-500 text-sm">{errors.tags.message}</p>
+              )}
             </div>
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="secondary">
+              <Button onClick={handleClose} type="button" variant="secondary">
                 Cancel
               </Button>
             </DialogClose>

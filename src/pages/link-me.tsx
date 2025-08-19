@@ -142,6 +142,8 @@ export default function LinkMe() {
               `https://picsum.photos/200/300?random=${link.id}`
             }
             title={link.title}
+            linkUrl={link.linkUrl}
+            tags={link.tags}
             description={link.description}
             author={link.author}
             isBookmarked={link.isBookmarked}
