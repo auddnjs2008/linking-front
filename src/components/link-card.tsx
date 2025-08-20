@@ -9,7 +9,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import { EditIcon, BookmarkPlusIcon, BookmarkCheckIcon } from "lucide-react";
+import {
+  EditIcon,
+  BookmarkPlusIcon,
+  BookmarkCheckIcon,
+  Trash2Icon,
+} from "lucide-react";
 import type { User } from "@/types/user";
 import { useBookmarkMutation } from "@/hooks/rqhooks/link/useBookmarkMutation";
 import { useUnBookmarkMutation } from "@/hooks/rqhooks/link/useUnBookmarkMutation";
@@ -19,6 +24,8 @@ import { useState } from "react";
 import { useUpdateLinkMutation } from "@/hooks/rqhooks/link/useUpdateLinkMutation";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import LinkDeletePopover from "./link-delete-popover";
+import { useDeleteLinkMutation } from "@/hooks/rqhooks/link/useDeleteLinkMutation";
 
 type LinkCardProps = {
   id: number;
@@ -50,7 +57,10 @@ export default function LinkCard({
   const { data: currentUser } = useMeQuery();
   const { mutate: bookmark } = useBookmarkMutation();
   const { mutate: unbookmark } = useUnBookmarkMutation();
+  const { mutate: deleteLink, isPending: deletePending } =
+    useDeleteLinkMutation();
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deletePopover, setDeletePopover] = useState(false);
 
   const { mutate: editLink, isPending } = useUpdateLinkMutation(() => {
     setEditModalOpen(false);
@@ -63,6 +73,10 @@ export default function LinkCard({
   };
   const handleUnBookmark = () => {
     unbookmark({ id });
+  };
+
+  const handleDelete = () => {
+    deleteLink({ id });
   };
 
   return (
@@ -90,15 +104,6 @@ export default function LinkCard({
               <BookmarkCheckIcon className="size-4 text-green-400" />
             )}
           </Button>
-          {/* <LinkActionModal
-            mode="edit"
-            initialData={{
-              title: "수정 테스트다",
-              description: "나는 이 카드를 수정 할 것이다.",
-              linkUrl: "https://www.naver.com",
-              tags: ["design", "ui/ux", "next.js"],
-            }}
-          > */}
           {author.id === currentUser?.id && (
             <Button
               variant="ghost"
@@ -111,7 +116,24 @@ export default function LinkCard({
               <EditIcon className="w-4 h-4" />
             </Button>
           )}
-          {/* </LinkActionModal> */}
+          {author.id === currentUser?.id && (
+            <LinkDeletePopover
+              title={title}
+              open={deletePopover}
+              handleClose={() => setDeletePopover(false)}
+              handleDelete={handleDelete}
+              isLoading={deletePending}
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 hover:text-gray-600 h-8 px-2"
+                onClick={() => setDeletePopover(true)}
+              >
+                <Trash2Icon className="w-4 h-4" />
+              </Button>
+            </LinkDeletePopover>
+          )}
         </div>
       </div>
 
