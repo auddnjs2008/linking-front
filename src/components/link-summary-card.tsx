@@ -14,7 +14,7 @@ type LinkSummaryCardProps = {
   description: string;
   url: string;
   isSelected?: boolean;
-  onSelect?: (selected: boolean) => void;
+  onSelect?: () => void;
   showCheckbox?: boolean;
 };
 
@@ -29,10 +29,12 @@ export default function LinkSummaryCard({
 }: LinkSummaryCardProps) {
   return (
     <Card
-      className={`bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-0 max-w-sm cursor-pointer ${
-        isSelected ? "ring-2 ring-blue-500 shadow-lg" : ""
+      className={`bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 ease-in-out h-[280px] p-0 max-w-sm cursor-pointer transform ${
+        isSelected
+          ? "ring-2 ring-blue-400 shadow-lg scale-[1.02] border-blue-200"
+          : "hover:scale-[1.01]"
       }`}
-      onClick={() => onSelect?.(!isSelected)}
+      onClick={() => onSelect?.()}
     >
       <CardContent className="p-0 relative">
         <img
@@ -46,7 +48,7 @@ export default function LinkSummaryCard({
               checked={isSelected}
               //   onChange={(checked) => onSelect?.(checked)}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white border-2 border-gray-300 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+              className="bg-white border-2 border-gray-300 data-[state=checked]:bg-blue-400 data-[state=checked]:border-blue-400 transition-all duration-200"
             />
           </div>
         )}
@@ -70,7 +72,9 @@ export default function LinkSummaryCard({
           Visit
         </a>
         {isSelected && (
-          <div className="text-xs text-blue-600 font-medium">Selected</div>
+          <div className="text-xs text-blue-600 font-medium animate-in fade-in-0 slide-in-from-bottom-1 duration-200">
+            Selected
+          </div>
         )}
       </CardFooter>
     </Card>
