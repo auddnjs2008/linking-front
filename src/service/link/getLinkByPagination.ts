@@ -21,10 +21,13 @@ type ResGetLinkByPagination = {
     author: User;
     tags: string[];
   }[];
-  nextCursor: number;
-  prevCursor: number;
-  hasNext: boolean;
-  hasPrev: boolean;
+  meta: {
+    hasNextPage: boolean;
+    nextCursor: number;
+    order: "ASC" | "DESC";
+    take: number;
+    currentCursor: number;
+  };
 };
 
 export const getLinkByPagination = async (req: ReqGetLinkByPagination) => {

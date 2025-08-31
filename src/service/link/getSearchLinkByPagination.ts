@@ -1,16 +1,14 @@
 import type { User } from "@/types/user";
 import { apiInstance } from "../api";
 
-type ReqGetUserLinkByPagination = {
-  userId: number;
-  query: {
-    take: number;
-    order: "ASC" | "DESC";
-    id: number;
-  };
+type ReqGetSearchLinkByPagination = {
+  keyword: string;
+  id: number;
+  order: "ASC" | "DESC";
+  take: number;
 };
 
-type ResGetuserLinkByPagination = {
+type ResGetSearchLinkByPagination = {
   data: {
     id: number;
     title: string;
@@ -33,15 +31,14 @@ type ResGetuserLinkByPagination = {
   };
 };
 
-export const getUserLinkByPagination = async (
-  req: ReqGetUserLinkByPagination
+export const getSearchLinkByPagination = async (
+  req: ReqGetSearchLinkByPagination
 ) => {
-  const result = await apiInstance.get<ResGetuserLinkByPagination>(
-    `/link/user/${req.userId}/cursor-pagination`,
+  const result = await apiInstance.get<ResGetSearchLinkByPagination>(
+    "/link/search",
     {
-      params: req.query,
+      params: req,
     }
   );
-
   return result.data;
 };

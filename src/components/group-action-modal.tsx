@@ -15,12 +15,31 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import LinkSummaryCard from "./link-summary-card";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useSearchLinkPaginationUtils } from "@/hooks/rqhooks/link/useSearchLinkPaginationQuery";
+import { PaginationObserver } from "./pagination-observer";
+import { Spinner } from "./ui/spinner";
 
 type GroupActionModalProps = {
   children: React.ReactNode;
 };
 
 export default function GroupActionModal({ children }: GroupActionModalProps) {
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const debouncedSearchKeyword = useDebounce(searchKeyword, 500);
+
+  const {
+    allLinks,
+    hasNextPage,
+    fetchNextPage,
+    isLoading: linksLoading,
+    error,
+  } = useSearchLinkPaginationUtils({
+    take: 10,
+    order: "ASC",
+    keyword: debouncedSearchKeyword,
+  });
+
   const [step, setStep] = useState(1);
   const [open, setOpen] = useState(false);
 
@@ -31,6 +50,11 @@ export default function GroupActionModal({ children }: GroupActionModalProps) {
 
   const handleModalTriggerClick = () => {
     setOpen(true);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchKeyword(value);
   };
 
   const handleClose = () => {
@@ -68,18 +92,35 @@ export default function GroupActionModal({ children }: GroupActionModalProps) {
           )}
           {step === 2 && (
             <div>
-              <Input placeholder="링크 검색" />
-              <div className="w-full h-96  overflow-auto  grid grid-cols-2 gap-5 p-3 mt-10">
-                {[1, 2, 3, 4, 5].map((item) => (
-                  <LinkSummaryCard
-                    key={item}
-                    title="lalala1"
-                    description="lalalalal2"
-                    url="https://www.naver.com"
-                    thumbnailUrl=""
-                  />
-                ))}
-              </div>
+              <Input onChange={handleInputChange} placeholder="링크 검색" />
+              {linksLoading && (
+                <div className="p-6 h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <Spinner size="lg" className="mx-auto mb-4" />
+                    <p className="text-gray-600">링크를 불러오는 중...</p>
+                  </div>
+                </div>
+              )}
+              {!linksLoading && !error && (
+                <div className="w-full h-96  overflow-auto  grid grid-cols-2 gap-5 p-3 mt-10">
+                  {allLinks.map((item) => (
+                    <LinkSummaryCard
+                      key={item.id}
+                      title={item.title}
+                      description={item.description}
+                      url={item.linkUrl}
+                      thumbnailUrl={item.thumbnail}
+                    />
+                  ))}
+                  {/* 페이지네이션 옵저버 */}
+                  {hasNextPage && (
+                    <PaginationObserver
+                      hasNextPage={hasNextPage}
+                      fetchNextPage={fetchNextPage}
+                    />
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

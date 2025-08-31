@@ -1,12 +1,15 @@
 import { apiInstance } from "../api";
 
-type ReqGetGroupByPagination = {
-  id?: number;
-  order: "ASC" | "DESC";
-  take: number;
+type ReqGetUserGroupByPagination = {
+  userId: number;
+  query: {
+    id?: number;
+    order: "ASC" | "DESC";
+    take: number;
+  };
 };
 
-type ResGetGroupByPagination = {
+type ResGetUserGroupByPagination = {
   data: {
     id: number;
     title: string;
@@ -32,13 +35,14 @@ type ResGetGroupByPagination = {
   };
 };
 
-export const getGroupByPagination = async (req: ReqGetGroupByPagination) => {
-  const result = await apiInstance.get<ResGetGroupByPagination>(
-    "/group/cursor-pagination",
+export const getUserGroupByPagination = async (
+  req: ReqGetUserGroupByPagination
+) => {
+  const result = await apiInstance.get<ResGetUserGroupByPagination>(
+    `/group/user/${req.userId}/cursor-pagination`,
     {
-      params: req,
+      params: req.query,
     }
   );
-
   return result.data;
 };

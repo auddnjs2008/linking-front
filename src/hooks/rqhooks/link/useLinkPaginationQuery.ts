@@ -13,9 +13,7 @@ export const useLinkPaginationQuery = (take: number, order: "ASC" | "DESC") => {
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
-      lastPage.hasNext ? lastPage.nextCursor : undefined,
-    getPreviousPageParam: (firstPage) =>
-      firstPage.hasPrev ? firstPage.prevCursor : undefined,
+      lastPage.meta.hasNextPage ? lastPage.meta.nextCursor : undefined,
   });
 };
 

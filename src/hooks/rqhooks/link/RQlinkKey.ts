@@ -2,6 +2,9 @@ export const RQlinkKey = {
   links: (limit: number, order: "ASC" | "DESC") =>
     ["link", "cursor-pagination", limit, order] as const,
 
+  searchLinks: (limit: number, order: "ASC" | "DESC", keyword: string) =>
+    ["link", "cursor-pagination", limit, order, keyword] as const,
+
   userLinks: ({
     take,
     order,

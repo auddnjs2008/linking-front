@@ -24,9 +24,8 @@ export const useUserLinkPaginationQuery = ({ take, order, userId }: Props) => {
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
-      lastPage.hasNext ? lastPage.nextCursor : undefined,
-    getPreviousPageParam: (firstPage) =>
-      firstPage.hasPrev ? firstPage.prevCursor : undefined,
+      lastPage.meta.hasNextPage ? lastPage.meta.nextCursor : undefined,
+
     enabled: !!userId, // userId가 있을 때만 실행
   });
 };

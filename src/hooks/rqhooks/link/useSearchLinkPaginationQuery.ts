@@ -1,18 +1,26 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { RQgroupKey } from "./RQgroupKey";
-import { getGroupByPagination } from "@/service/group/getGroupByPagination";
+import { RQlinkKey } from "./RQlinkKey";
+import { getSearchLinkByPagination } from "@/service/link/getSearchLinkByPagination";
 
-export const useGropuPaginationQuery = (
-  take: number,
-  order: "ASC" | "DESC"
-) => {
+type Props = {
+  take: number;
+  order: "ASC" | "DESC";
+  keyword: string;
+};
+
+export const useSearchLinkPaginationQuery = ({
+  take,
+  order,
+  keyword,
+}: Props) => {
   return useInfiniteQuery({
-    queryKey: RQgroupKey.groups(take, order),
+    queryKey: RQlinkKey.searchLinks(take, order, keyword), // limit만 포함
     queryFn: ({ pageParam }) =>
-      getGroupByPagination({
+      getSearchLinkByPagination({
         take,
         id: pageParam ?? 0,
         order,
+        keyword,
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
@@ -20,13 +28,15 @@ export const useGropuPaginationQuery = (
   });
 };
 
-export const useGroupPaginationUtils = (
-  take: number,
-  order: "ASC" | "DESC"
-) => {
-  const query = useGropuPaginationQuery(take, order);
+// 커서 기반 페이지네이션을 위한 유틸리티 함수들
+export const useSearchLinkPaginationUtils = ({
+  take,
+  order,
+  keyword,
+}: Props) => {
+  const query = useSearchLinkPaginationQuery({ take, order, keyword });
 
-  const allGroups = query.data?.pages.flatMap((page) => page.data) ?? [];
+  const allLinks = query.data?.pages.flatMap((page) => page.data) ?? [];
 
   const goToNextPage = () => {
     if (query.hasNextPage && !query.isFetchingNextPage) {
@@ -46,7 +56,7 @@ export const useGroupPaginationUtils = (
 
   return {
     ...query,
-    allGroups,
+    allLinks,
 
     goToNextPage,
     goToPreviousPage,

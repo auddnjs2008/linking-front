@@ -1,31 +1,35 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { RQgroupKey } from "./RQgroupKey";
-import { getGroupByPagination } from "@/service/group/getGroupByPagination";
+import { getUserGroupByPagination } from "@/service/group/getUserGroupByPagination";
 
-export const useGropuPaginationQuery = (
-  take: number,
-  order: "ASC" | "DESC"
-) => {
+type Props = {
+  take: number;
+  order: "ASC" | "DESC";
+  userId?: number;
+};
+
+export const useUserGroupPaginationQuery = ({ take, order, userId }: Props) => {
   return useInfiniteQuery({
-    queryKey: RQgroupKey.groups(take, order),
-    queryFn: ({ pageParam }) =>
-      getGroupByPagination({
-        take,
-        id: pageParam ?? 0,
-        order,
-      }),
+    queryKey: RQgroupKey.userGroups({ take, order, userId }),
+    queryFn: ({ pageParam }) => {
+      return getUserGroupByPagination({
+        userId: userId as number,
+        query: {
+          take,
+          id: pageParam ?? 0,
+          order,
+        },
+      });
+    },
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
       lastPage.meta.hasNextPage ? lastPage.meta.nextCursor : undefined,
+    enabled: !!userId,
   });
 };
 
-export const useGroupPaginationUtils = (
-  take: number,
-  order: "ASC" | "DESC"
-) => {
-  const query = useGropuPaginationQuery(take, order);
-
+export const useUserGroupPaginationUtils = (props: Props) => {
+  const query = useUserGroupPaginationQuery(props);
   const allGroups = query.data?.pages.flatMap((page) => page.data) ?? [];
 
   const goToNextPage = () => {
@@ -47,7 +51,6 @@ export const useGroupPaginationUtils = (
   return {
     ...query,
     allGroups,
-
     goToNextPage,
     goToPreviousPage,
     refresh,
