@@ -10,6 +10,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { LinkIcon, StarIcon, EditIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
+import { getRelativeTime } from "@/utils/getRelativeTime";
 
 type GroupCardProps = {
   id: number;
@@ -39,7 +40,7 @@ export default function GroupCard({
   };
 
   return (
-    <Card className="bg-white rounded-2xl shadow-lg max-w-xs flex flex-col items-stretch transition-shadow hover:shadow-xl p-0">
+    <Card className="bg-white rounded-2xl shadow-lg max-w-sm flex flex-col items-stretch transition-shadow hover:shadow-xl p-0">
       <CardHeader className="pt-5 pb-2 px-6">
         <div className="flex justify-between items-start">
           <div>
@@ -72,7 +73,7 @@ export default function GroupCard({
           <LinkIcon className="w-4 h-4" />
           <span>{linkCount} links</span>
           <span>•</span>
-          <span>Created {createdDate}</span>
+          <span>{getRelativeTime(createdDate)}</span>
         </div>
       </CardContent>
 

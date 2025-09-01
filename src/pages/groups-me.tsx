@@ -143,7 +143,7 @@ export default function MyGroupPage() {
             id={group.id}
             title={group.title}
             description={group.description}
-            linkCount={10}
+            linkCount={group.linkedLinksCount}
             createdDate={group.createdAt}
             ownerAvatar={group.author.profile}
             ownerInitials={group.author.name}

@@ -14,6 +14,7 @@ type ResGetUserGroupByPagination = {
     id: number;
     title: string;
     description: string;
+    linkedLinksCount: number;
     author: {
       id: number;
       name: string;
