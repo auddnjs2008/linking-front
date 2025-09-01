@@ -19,6 +19,30 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useSearchLinkPaginationUtils } from "@/hooks/rqhooks/link/useSearchLinkPaginationQuery";
 import { PaginationObserver } from "./pagination-observer";
 import { Skeleton } from "./ui/skeleton";
+import z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useCreateGroupMutation } from "@/hooks/rqhooks/group/useCreateGroupMutation";
+import { InlineSpinner } from "./ui/spinner";
+
+type Inputs = {
+  title: string;
+  description: string;
+  selectedLinks: { id: number; title: string }[];
+};
+
+const schema = z.object({
+  title: z.string().min(5, "타이틀은 5자 이상이어야 합니다."),
+  description: z.string().min(10, "설명은 10자 이상이어야 합니다."),
+  selectedLinks: z
+    .array(
+      z.object({
+        id: z.number(),
+        title: z.string(),
+      })
+    )
+    .min(1, "최소 1개의 링크를 선택해야 합니다."),
+});
 
 type GroupActionModalProps = {
   children: React.ReactNode;
@@ -30,6 +54,21 @@ export default function GroupActionModal({ children }: GroupActionModalProps) {
     { id: number; title: string }[]
   >([]);
   const debouncedSearchKeyword = useDebounce(searchKeyword, 500);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm<Inputs>({
+    resolver: zodResolver(schema),
+    mode: "onChange",
+    defaultValues: {
+      title: "",
+      description: "",
+      selectedLinks: [],
+    },
+  });
 
   const {
     allLinks,
@@ -46,6 +85,26 @@ export default function GroupActionModal({ children }: GroupActionModalProps) {
   const [step, setStep] = useState(1);
   const [open, setOpen] = useState(false);
 
+  const handleClose = () => {
+    setOpen(false);
+    setSelectCards([]);
+    setValue("selectedLinks", []);
+    setTimeout(() => {
+      setStep(1);
+    }, 150);
+  };
+
+  const { mutate, isPending } = useCreateGroupMutation(handleClose);
+
+  const handleFormSubmit = (data: Inputs) => {
+    const submitData = {
+      title: data.title,
+      description: data.description,
+      linkIds: data.selectedLinks.map((link) => link.id),
+    };
+    mutate(submitData);
+  };
+
   const handleNext = () => {
     if (step === 2) return;
     setStep((prev) => prev + 1);
@@ -53,15 +112,16 @@ export default function GroupActionModal({ children }: GroupActionModalProps) {
 
   const handleCardSelect = (id: number, title: string) => {
     const goalIdx = selectCards.findIndex((value) => value.id === id);
+    let newSelectCards;
+
     if (goalIdx !== -1) {
-      setSelectCards((prev) => {
-        const newIds = [...prev];
-        newIds.splice(goalIdx, 1);
-        return newIds;
-      });
+      newSelectCards = selectCards.filter((_, index) => index !== goalIdx);
     } else {
-      setSelectCards((prev) => [...prev, { id, title }]);
+      newSelectCards = [...selectCards, { id, title }];
     }
+
+    setSelectCards(newSelectCards);
+    setValue("selectedLinks", newSelectCards);
   };
 
   const handleModalTriggerClick = () => {
@@ -71,14 +131,6 @@ export default function GroupActionModal({ children }: GroupActionModalProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchKeyword(value);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setSelectCards([]);
-    setTimeout(() => {
-      setStep(1);
-    }, 150);
   };
 
   // 스켈레톤 카드 컴포넌트
@@ -106,17 +158,33 @@ export default function GroupActionModal({ children }: GroupActionModalProps) {
             Create a new group to share with others.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-2 flex-1">
+        <form
+          id="group-form"
+          onSubmit={handleSubmit(handleFormSubmit)}
+          className="flex flex-col gap-2 flex-1"
+        >
           {step === 1 && (
             <>
               <div className="grid flex-1 gap-2">
                 <Label htmlFor="title">Title</Label>
-                <Input id="title" />
+                <Input id="title" {...register("title")} />
+                {errors.title && (
+                  <p className="text-red-500 text-sm">{errors.title.message}</p>
+                )}
               </div>
 
               <div className="grid flex-1 gap-2">
                 <Label htmlFor="description">Description</Label>
-                <Textarea id="thumbnail" className="h-50" />
+                <Textarea
+                  id="description"
+                  {...register("description")}
+                  className="h-50"
+                />
+                {errors.description && (
+                  <p className="text-red-500 text-sm">
+                    {errors.description.message}
+                  </p>
+                )}
               </div>
             </>
           )}
@@ -145,6 +213,7 @@ export default function GroupActionModal({ children }: GroupActionModalProps) {
                       >
                         <span className="truncate max-w-32">{link.title}</span>
                         <button
+                          type="button"
                           onClick={() => handleCardSelect(link.id, link.title)}
                           className="ml-1 text-blue-600 hover:text-blue-800"
                         >
@@ -153,6 +222,15 @@ export default function GroupActionModal({ children }: GroupActionModalProps) {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* 선택된 링크 에러 메시지 */}
+              {errors.selectedLinks && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-600 text-sm">
+                    {errors.selectedLinks.message}
+                  </p>
                 </div>
               )}
 
@@ -202,15 +280,33 @@ export default function GroupActionModal({ children }: GroupActionModalProps) {
               </div>
             </div>
           )}
-        </div>
+        </form>
         <DialogFooter>
           <DialogClose asChild>
             <Button onClick={handleClose} type="button" variant="secondary">
               Close
             </Button>
           </DialogClose>
-          {step === 1 && <Button onClick={handleNext}>Next</Button>}
-          {step === 2 && <Button>Create</Button>}
+          {step === 1 && (
+            <Button type="button" onClick={handleNext}>
+              Next
+            </Button>
+          )}
+          {step === 2 && (
+            <>
+              <Button
+                type="button"
+                onClick={() => setStep(1)}
+                variant="outline"
+              >
+                Back
+              </Button>
+              <Button type="submit" disabled={isPending} form="group-form">
+                {isPending && <InlineSpinner />}
+                Create
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
