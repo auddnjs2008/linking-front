@@ -7,10 +7,17 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { LinkIcon, StarIcon, EditIcon } from "lucide-react";
+import {
+  LinkIcon,
+  EditIcon,
+  BookmarkPlusIcon,
+  BookmarkCheckIcon,
+} from "lucide-react";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
 import { getRelativeTime } from "@/utils/getRelativeTime";
+import { useGroupBookmarkMutation } from "@/hooks/rqhooks/group/useGroupBookmarkMutation";
+import { useGroupUnBookmarkMutation } from "@/hooks/rqhooks/group/useGroupUnBookmarkMutation";
 
 type GroupCardProps = {
   id: number;
@@ -21,6 +28,7 @@ type GroupCardProps = {
   ownerAvatar: string;
   ownerInitials: string;
   ownerName: string;
+  isBookmarked: boolean;
 };
 
 export default function GroupCard({
@@ -32,8 +40,20 @@ export default function GroupCard({
   ownerAvatar,
   ownerInitials,
   ownerName,
+  isBookmarked,
 }: GroupCardProps) {
   const navigate = useNavigate();
+
+  const { mutate: bookmark } = useGroupBookmarkMutation();
+
+  const { mutate: unbookmark } = useGroupUnBookmarkMutation();
+
+  const handleBookmark = () => {
+    bookmark({ id });
+  };
+  const handleUnBookmark = () => {
+    unbookmark({ id });
+  };
 
   const handleViewGroup = () => {
     navigate(`/groups/${id}`);
@@ -54,9 +74,15 @@ export default function GroupCard({
           <div className="flex gap-2">
             <Button
               variant="outline"
+              size="sm"
               className="text-gray-400 hover:text-gray-600"
+              onClick={!isBookmarked ? handleBookmark : handleUnBookmark}
             >
-              <StarIcon className="w-4 h-4" />
+              {!isBookmarked ? (
+                <BookmarkPlusIcon className="size-4 text-red-400" />
+              ) : (
+                <BookmarkCheckIcon className="size-4 text-green-400" />
+              )}
             </Button>
             <Button
               variant="ghost"

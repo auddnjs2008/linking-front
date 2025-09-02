@@ -75,17 +75,18 @@ export default function GroupPage() {
         </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {allGroups.map((_, index) => (
+        {allGroups.map((group, index) => (
           <GroupCard
             key={index}
-            id={1}
-            title="Group Title"
-            description="Group Description"
-            linkCount={10}
-            createdDate="2021-01-01"
-            ownerAvatar="https://github.com/shadcn.png"
-            ownerInitials="CN"
-            ownerName="John Doe"
+            id={group.id}
+            title={group.title}
+            description={group.description}
+            linkCount={group.linkedLinksCount}
+            createdDate={group.createdAt}
+            ownerAvatar={group.author.profile}
+            ownerInitials={group.author.name}
+            ownerName={group.author.name}
+            isBookmarked={group.isBookmarked}
           />
         ))}
         {/* 페이지네이션 옵저버 */}

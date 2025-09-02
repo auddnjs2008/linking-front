@@ -1,21 +1,22 @@
-// 페이지네이션 데이터의 타입 정의
-export type PaginationData = {
+export type GroupPaginationData = {
   pages: Array<{
     data: Array<{
       id: number;
-      isBookmarked: boolean;
       title: string;
-      linkUrl: string;
-      thumbnail: string;
       description: string;
-      creatorId: number;
-      createdAt: string;
-      updatedAt: string;
+      linkedLinksCount: number;
       author: {
         id: number;
-        username: string;
-        [key: string]: unknown;
+        name: string;
+        email: string;
+        loginType: "google" | "local";
+        profile: string;
+        createdAt: string;
+        updatedAt: string;
       };
+      createdAt: string;
+      updatedAt: string;
+      isBookmarked: boolean;
     }>;
     meta: {
       hasNextPage: boolean;

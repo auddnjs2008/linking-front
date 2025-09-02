@@ -26,6 +26,7 @@ type ResGetUserGroupByPagination = {
     };
     createdAt: string;
     updatedAt: string;
+    isBookmarked: boolean;
   }[];
   meta: {
     hasNextPage: boolean;

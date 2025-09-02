@@ -11,6 +11,7 @@ type ResGetGroupByPagination = {
     id: number;
     title: string;
     description: string;
+    linkedLinksCount: number;
     author: {
       id: number;
       name: string;
@@ -22,6 +23,7 @@ type ResGetGroupByPagination = {
     };
     createdAt: string;
     updatedAt: string;
+    isBookmarked: boolean;
   }[];
   meta: {
     hasNextPage: boolean;

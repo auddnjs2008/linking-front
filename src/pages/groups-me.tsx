@@ -148,6 +148,7 @@ export default function MyGroupPage() {
             ownerAvatar={group.author.profile}
             ownerInitials={group.author.name}
             ownerName={group.author.name}
+            isBookmarked={group.isBookmarked}
           />
         ))}
         {/* 페이지네이션 옵저버 */}
