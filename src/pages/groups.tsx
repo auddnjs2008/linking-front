@@ -83,9 +83,7 @@ export default function GroupPage() {
             description={group.description}
             linkCount={group.linkedLinksCount}
             createdDate={group.createdAt}
-            ownerAvatar={group.author.profile}
-            ownerInitials={group.author.name}
-            ownerName={group.author.name}
+            author={group.author}
             isBookmarked={group.isBookmarked}
           />
         ))}

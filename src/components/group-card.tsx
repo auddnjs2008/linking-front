@@ -18,6 +18,8 @@ import { useNavigate } from "react-router-dom";
 import { getRelativeTime } from "@/utils/getRelativeTime";
 import { useGroupBookmarkMutation } from "@/hooks/rqhooks/group/useGroupBookmarkMutation";
 import { useGroupUnBookmarkMutation } from "@/hooks/rqhooks/group/useGroupUnBookmarkMutation";
+import { useMeQuery } from "@/hooks/rqhooks/user/useMeQuery";
+import type { User } from "@/types/user";
 
 type GroupCardProps = {
   id: number;
@@ -25,9 +27,7 @@ type GroupCardProps = {
   description: string;
   linkCount: number;
   createdDate: string;
-  ownerAvatar: string;
-  ownerInitials: string;
-  ownerName: string;
+  author: User;
   isBookmarked: boolean;
 };
 
@@ -37,12 +37,11 @@ export default function GroupCard({
   description,
   linkCount,
   createdDate,
-  ownerAvatar,
-  ownerInitials,
-  ownerName,
+  author,
   isBookmarked,
 }: GroupCardProps) {
   const navigate = useNavigate();
+  const { data: currentUser } = useMeQuery();
 
   const { mutate: bookmark } = useGroupBookmarkMutation();
 
@@ -84,12 +83,14 @@ export default function GroupCard({
                 <BookmarkCheckIcon className="size-4 text-green-400" />
               )}
             </Button>
-            <Button
-              variant="ghost"
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <EditIcon className="w-4 h-4" />
-            </Button>
+            {author.id === currentUser?.id && (
+              <Button
+                variant="ghost"
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <EditIcon className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -107,10 +108,10 @@ export default function GroupCard({
         <Button onClick={handleViewGroup}>View Group</Button>
         <div className="flex items-center gap-2">
           <Avatar className="w-6 h-6">
-            <AvatarImage src={ownerAvatar} />
-            <AvatarFallback>{ownerInitials}</AvatarFallback>
+            <AvatarImage src={author.profile} />
+            <AvatarFallback>{author.name}</AvatarFallback>
           </Avatar>
-          <span className="text-sm text-gray-500">{ownerName}</span>
+          <span className="text-sm text-gray-500">{author.name}</span>
         </div>
       </CardFooter>
     </Card>
