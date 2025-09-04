@@ -25,7 +25,7 @@ type BookmarkedUser = {
   isBookmarked: boolean;
 };
 
-type ResGetGroupDetail = {
+export type ResGetGroupDetail = {
   id: number;
   title: string;
   description: string;

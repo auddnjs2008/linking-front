@@ -1,6 +1,7 @@
 import { unBookmarkLink } from "@/service/link/unbookmarkLink";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { PaginationData } from "./types";
+import type { ResGetGroupDetail } from "@/service/group/getGroupDetail";
 
 export const useUnBookmarkMutation = () => {
   const queryClient = useQueryClient();
@@ -13,8 +14,15 @@ export const useUnBookmarkMutation = () => {
         queryKey: ["link"],
       });
 
+      await queryClient.cancelQueries({
+        queryKey: ["group", "detail"],
+      });
+
       // 이전 데이터들을 저장할 객체
-      const previousQueries: Record<string, PaginationData> = {};
+      const previousQueries: Record<
+        string,
+        PaginationData | ResGetGroupDetail
+      > = {};
 
       // 모든 페이지네이션 쿼리에서 해당 링크의 북마크 상태를 옵티미스틱하게 업데이트
       queryClient
@@ -44,6 +52,23 @@ export const useUnBookmarkMutation = () => {
             // 쿼리 데이터 업데이트
             queryClient.setQueryData(queryKey, newData);
           }
+        });
+
+      queryClient
+        .getQueriesData({ queryKey: ["group", "detail"] })
+        .forEach(([queryKey, data]) => {
+          const groupData = data as ResGetGroupDetail;
+          previousQueries[JSON.stringify(queryKey)] =
+            groupData as ResGetGroupDetail;
+
+          const newData = {
+            ...groupData,
+            linkedLinks: groupData.linkedLinks.map((link) =>
+              link.id !== id ? link : { ...link, isBookmarked: false }
+            ),
+          };
+
+          queryClient.setQueryData(queryKey, newData);
         });
 
       return { previousQueries };

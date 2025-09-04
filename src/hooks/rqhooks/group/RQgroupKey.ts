@@ -11,5 +11,5 @@ export const RQgroupKey = {
     userId?: number;
   }) =>
     ["group", "cursor-pagination", userId ?? "no-user", take, order] as const,
-  groupDetail: (id: number) => ["group", id] as const,
+  groupDetail: (id: number) => ["group", "detail", id] as const,
 };
