@@ -81,7 +81,7 @@ export default function GroupPage() {
             id={group.id}
             title={group.title}
             description={group.description}
-            linkCount={group.linkedLinksCount}
+            linkedLinks={group.linkedLinks}
             createdDate={group.createdAt}
             author={group.author}
             isBookmarked={group.isBookmarked}

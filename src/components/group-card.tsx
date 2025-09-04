@@ -20,12 +20,17 @@ import { useGroupBookmarkMutation } from "@/hooks/rqhooks/group/useGroupBookmark
 import { useGroupUnBookmarkMutation } from "@/hooks/rqhooks/group/useGroupUnBookmarkMutation";
 import { useMeQuery } from "@/hooks/rqhooks/user/useMeQuery";
 import type { User } from "@/types/user";
+import { useState } from "react";
+import GroupActionModal from "./group-action-modal";
+import { useUpdateGroupMutation } from "@/hooks/rqhooks/group/useUpdateGroupMutation";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 type GroupCardProps = {
   id: number;
   title: string;
   description: string;
-  linkCount: number;
+  linkedLinks: { id: number; title: string }[];
   createdDate: string;
   author: User;
   isBookmarked: boolean;
@@ -35,17 +40,25 @@ export default function GroupCard({
   id,
   title,
   description,
-  linkCount,
+  linkedLinks,
   createdDate,
   author,
   isBookmarked,
 }: GroupCardProps) {
   const navigate = useNavigate();
   const { data: currentUser } = useMeQuery();
-
+  const queryClient = useQueryClient();
   const { mutate: bookmark } = useGroupBookmarkMutation();
 
   const { mutate: unbookmark } = useGroupUnBookmarkMutation();
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
+  const { mutate: editGroup, isPending } = useUpdateGroupMutation(() => {
+    setEditModalOpen(false);
+    toast.success("업데이트에 성공하였습니다.");
+    queryClient.invalidateQueries({ queryKey: ["group", "cursor-pagination"] });
+  });
 
   const handleBookmark = () => {
     bookmark({ id });
@@ -87,6 +100,7 @@ export default function GroupCard({
               <Button
                 variant="ghost"
                 className="text-gray-400 hover:text-gray-600"
+                onClick={() => setEditModalOpen(true)}
               >
                 <EditIcon className="w-4 h-4" />
               </Button>
@@ -98,7 +112,7 @@ export default function GroupCard({
       <CardContent className="px-6 py-2">
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <LinkIcon className="w-4 h-4" />
-          <span>{linkCount} links</span>
+          <span>{linkedLinks.length} links</span>
           <span>•</span>
           <span>{getRelativeTime(createdDate)}</span>
         </div>
@@ -114,6 +128,27 @@ export default function GroupCard({
           <span className="text-sm text-gray-500">{author.name}</span>
         </div>
       </CardFooter>
+      <GroupActionModal
+        open={editModalOpen}
+        handleClose={() => setEditModalOpen(false)}
+        mode="edit"
+        initalData={{
+          title,
+          description,
+          selectedLinks: linkedLinks,
+        }}
+        onSubmit={(input) => {
+          editGroup({
+            id,
+            body: {
+              title: input.title,
+              description: input.description,
+              linkIds: input.selectedLinks.map((link) => link.id),
+            },
+          });
+        }}
+        isPending={isPending}
+      />
     </Card>
   );
 }

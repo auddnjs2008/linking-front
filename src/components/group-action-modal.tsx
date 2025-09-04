@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -9,7 +9,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -22,7 +21,6 @@ import { Skeleton } from "./ui/skeleton";
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCreateGroupMutation } from "@/hooks/rqhooks/group/useCreateGroupMutation";
 import { InlineSpinner } from "./ui/spinner";
 
 type Inputs = {
@@ -45,15 +43,35 @@ const schema = z.object({
 });
 
 type GroupActionModalProps = {
-  children: React.ReactNode;
+  mode: "create" | "edit";
+  open: boolean;
+  handleClose: () => void;
+  initalData?: Inputs;
+  isPending?: boolean;
+  onSubmit: (data: Inputs) => void;
 };
 
-export default function GroupActionModal({ children }: GroupActionModalProps) {
+export default function GroupActionModal({
+  mode,
+  open,
+  handleClose,
+  onSubmit,
+  initalData,
+  isPending,
+}: GroupActionModalProps) {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [selectCards, setSelectCards] = useState<
     { id: number; title: string }[]
   >([]);
   const debouncedSearchKeyword = useDebounce(searchKeyword, 500);
+
+  const isEditMode = mode === "edit";
+  const title = isEditMode ? "Edit Group" : "Create Group";
+  const description = isEditMode
+    ? "Edit Group."
+    : "Create a new group to share with others.";
+
+  const submitText = isEditMode ? "Update" : "Create";
 
   const {
     register,
@@ -63,7 +81,7 @@ export default function GroupActionModal({ children }: GroupActionModalProps) {
   } = useForm<Inputs>({
     resolver: zodResolver(schema),
     mode: "onChange",
-    defaultValues: {
+    defaultValues: initalData || {
       title: "",
       description: "",
       selectedLinks: [],
@@ -83,27 +101,6 @@ export default function GroupActionModal({ children }: GroupActionModalProps) {
   });
 
   const [step, setStep] = useState(1);
-  const [open, setOpen] = useState(false);
-
-  const handleClose = () => {
-    setOpen(false);
-    setSelectCards([]);
-    setValue("selectedLinks", []);
-    setTimeout(() => {
-      setStep(1);
-    }, 150);
-  };
-
-  const { mutate, isPending } = useCreateGroupMutation(handleClose);
-
-  const handleFormSubmit = (data: Inputs) => {
-    const submitData = {
-      title: data.title,
-      description: data.description,
-      linkIds: data.selectedLinks.map((link) => link.id),
-    };
-    mutate(submitData);
-  };
 
   const handleNext = () => {
     if (step === 2) return;
@@ -124,14 +121,20 @@ export default function GroupActionModal({ children }: GroupActionModalProps) {
     setValue("selectedLinks", newSelectCards);
   };
 
-  const handleModalTriggerClick = () => {
-    setOpen(true);
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchKeyword(value);
   };
+
+  useEffect(() => {
+    if (mode === "create" || !initalData) return;
+    setSelectCards(initalData.selectedLinks);
+  }, [mode, initalData]);
+
+  useEffect(() => {
+    if (open) return;
+    setStep(1);
+  }, [open]);
 
   // 스켈레톤 카드 컴포넌트
   const SkeletonCard = () => (
@@ -145,22 +148,17 @@ export default function GroupActionModal({ children }: GroupActionModalProps) {
 
   return (
     <Dialog open={open}>
-      <DialogTrigger onClick={handleModalTriggerClick} asChild>
-        {children}
-      </DialogTrigger>
       <DialogContent
         onCloseButton={handleClose}
         className="sm:max-w-5xl min-h-[600px]"
       >
         <DialogHeader>
-          <DialogTitle>Create Group</DialogTitle>
-          <DialogDescription>
-            Create a new group to share with others.
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <form
           id="group-form"
-          onSubmit={handleSubmit(handleFormSubmit)}
+          onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-2 flex-1"
         >
           {step === 1 && (
@@ -303,7 +301,7 @@ export default function GroupActionModal({ children }: GroupActionModalProps) {
               </Button>
               <Button type="submit" disabled={isPending} form="group-form">
                 {isPending && <InlineSpinner />}
-                Create
+                {submitText}
               </Button>
             </>
           )}

@@ -4,19 +4,36 @@ import GroupActionModal from "./group-action-modal";
 import { useCreateLinkMutation } from "@/hooks/rqhooks/link/useCreateLinkMutation";
 import { useState } from "react";
 import LinkActionModal from "./link-action-modal";
+import { useCreateGroupMutation } from "@/hooks/rqhooks/group/useCreateGroupMutation";
 
 export default function ButtonController({ type }: { type: "group" | "link" }) {
-  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [createLinkModalOpen, setCreateLinkModalOpen] = useState(false);
+  const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
 
-  const { mutate } = useCreateLinkMutation();
+  const { mutate: createLink } = useCreateLinkMutation();
+  const { mutate: createGroup, isPending: createGroupPending } =
+    useCreateGroupMutation(() => setCreateGroupModalOpen(false));
 
-  const handleCreate = (data: {
+  const handleCreateLink = (data: {
     title: string;
     description: string;
     linkUrl: string;
     tags: string[];
   }) => {
-    mutate(data);
+    createLink(data);
+  };
+
+  const handleCreateGroup = (data: {
+    title: string;
+    description: string;
+    selectedLinks: { id: number; title: string }[];
+  }) => {
+    const { title, description, selectedLinks } = data;
+    createGroup({
+      title,
+      description,
+      linkIds: selectedLinks.map((link) => link.id),
+    });
   };
 
   return (
@@ -38,20 +55,19 @@ export default function ButtonController({ type }: { type: "group" | "link" }) {
           <Button
             size="icon"
             className="w-12 h-12 rounded-full shadow-lg bg-black text-white hover:bg-gray-800"
-            onClick={() => setCreateModalOpen(true)}
+            onClick={() => setCreateLinkModalOpen(true)}
           >
             <PlusIcon className="w-5 h-5" />
           </Button>
         )}
         {type === "group" && (
-          <GroupActionModal>
-            <Button
-              size="icon"
-              className="w-12 h-12 rounded-full shadow-lg bg-black text-white hover:bg-gray-800"
-            >
-              <PlusIcon className="w-5 h-5" />
-            </Button>
-          </GroupActionModal>
+          <Button
+            size="icon"
+            className="w-12 h-12 rounded-full shadow-lg bg-black text-white hover:bg-gray-800"
+            onClick={() => setCreateGroupModalOpen(true)}
+          >
+            <PlusIcon className="w-5 h-5" />
+          </Button>
         )}
 
         {/* 필터 버튼 */}
@@ -73,10 +89,17 @@ export default function ButtonController({ type }: { type: "group" | "link" }) {
         </Button>
       </div>
       <LinkActionModal
-        onSubmit={handleCreate}
+        onSubmit={handleCreateLink}
         mode="create"
-        open={createModalOpen}
-        handleClose={() => setCreateModalOpen(false)}
+        open={createLinkModalOpen}
+        handleClose={() => setCreateLinkModalOpen(false)}
+      />
+      <GroupActionModal
+        onSubmit={handleCreateGroup}
+        mode="create"
+        open={createGroupModalOpen}
+        handleClose={() => setCreateGroupModalOpen(false)}
+        isPending={createGroupPending}
       />
     </>
   );
