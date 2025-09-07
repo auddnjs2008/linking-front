@@ -1,14 +1,22 @@
-import { ArrowUpIcon, FilterIcon, GridIcon, PlusIcon } from "lucide-react";
+import {
+  ArrowUpIcon,
+  FilterIcon,
+  GridIcon,
+  ListIcon,
+  PlusIcon,
+} from "lucide-react";
 import { Button } from "./ui/button";
 import GroupActionModal from "./group-action-modal";
 import { useCreateLinkMutation } from "@/hooks/rqhooks/link/useCreateLinkMutation";
 import { useState } from "react";
 import LinkActionModal from "./link-action-modal";
 import { useCreateGroupMutation } from "@/hooks/rqhooks/group/useCreateGroupMutation";
+import { useViewMode } from "@/contexts/ViewModeContext";
 
 export default function ButtonController({ type }: { type: "group" | "link" }) {
   const [createLinkModalOpen, setCreateLinkModalOpen] = useState(false);
   const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
+  const { viewMode, toggleViewMode } = useViewMode();
 
   const { mutate: createLink } = useCreateLinkMutation();
   const { mutate: createGroup, isPending: createGroupPending } =
@@ -84,8 +92,14 @@ export default function ButtonController({ type }: { type: "group" | "link" }) {
           variant="outline"
           size="icon"
           className="w-12 h-12 rounded-full shadow-lg bg-white hover:bg-gray-50"
+          onClick={toggleViewMode}
+          title={viewMode === "grid" ? "리스트 뷰로 전환" : "그리드 뷰로 전환"}
         >
-          <GridIcon className="w-5 h-5" />
+          {viewMode === "grid" ? (
+            <ListIcon className="w-5 h-5" />
+          ) : (
+            <GridIcon className="w-5 h-5" />
+          )}
         </Button>
       </div>
       <LinkActionModal

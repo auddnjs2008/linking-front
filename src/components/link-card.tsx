@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import DeletePopover from "./delete-popover";
 import { useDeleteLinkMutation } from "@/hooks/rqhooks/link/useDeleteLinkMutation";
+import type { ViewMode } from "@/contexts/ViewModeContext";
 
 type LinkCardProps = {
   id: number;
@@ -36,6 +37,7 @@ type LinkCardProps = {
   description: string;
   author: User;
   isBookmarked: boolean;
+  viewMode?: ViewMode;
 };
 
 export default function LinkCard({
@@ -47,6 +49,7 @@ export default function LinkCard({
   tags,
   author,
   isBookmarked,
+  viewMode = "grid",
 }: LinkCardProps) {
   const navigate = useNavigate();
   const handleSeeMore = () => {
@@ -68,16 +71,122 @@ export default function LinkCard({
     queryClient.invalidateQueries({ queryKey: ["link", "cursor-pagination"] });
   });
 
-  const handleBookmark = () => {
+  const handleBookmark = (e: React.MouseEvent) => {
+    e.stopPropagation();
     bookmark({ id });
   };
-  const handleUnBookmark = () => {
+  const handleUnBookmark = (e: React.MouseEvent) => {
+    e.stopPropagation();
     unbookmark({ id });
   };
 
   const handleDelete = () => {
     deleteLink({ id });
   };
+
+  if (viewMode === "list") {
+    return (
+      <>
+        <Card
+          onClick={handleSeeMore}
+          className="bg-white cursor-pointer rounded-2xl shadow-lg transition-shadow hover:shadow-xl p-0"
+        >
+          <div className="flex">
+            {/* 썸네일 */}
+            <div className="flex-shrink-0">
+              <img
+                src={thumbnailUrl}
+                alt={title}
+                className="w-32 h-full object-cover rounded-l-2xl"
+              />
+            </div>
+
+            {/* 콘텐츠 영역 */}
+            <div className="flex-1 flex flex-col">
+              <div className="flex-1 p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <CardTitle className="font-bold text-gray-900 text-lg mb-1 truncate flex-1">
+                    {title}
+                  </CardTitle>
+                  <div className="flex gap-1 ml-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-gray-400 hover:text-gray-600 h-8 w-8 p-0"
+                      onClick={
+                        !isBookmarked ? handleBookmark : handleUnBookmark
+                      }
+                    >
+                      {!isBookmarked ? (
+                        <BookmarkPlusIcon className="size-4 text-red-400" />
+                      ) : (
+                        <BookmarkCheckIcon className="size-4 text-green-400" />
+                      )}
+                    </Button>
+                    {author.id === currentUser?.id && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:text-gray-600 h-8 w-8 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditModalOpen(true);
+                        }}
+                      >
+                        <EditIcon className="w-4 h-4" />
+                      </Button>
+                    )}
+                    {author.id === currentUser?.id && (
+                      <DeletePopover
+                        mode="link"
+                        title={title}
+                        open={deletePopover}
+                        handleClose={() => setDeletePopover(false)}
+                        handleDelete={handleDelete}
+                        isLoading={deletePending}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-400 hover:text-gray-600 h-8 w-8 p-0"
+                          onClick={() => setDeletePopover(true)}
+                        >
+                          <Trash2Icon className="w-4 h-4" />
+                        </Button>
+                      </DeletePopover>
+                    )}
+                  </div>
+                </div>
+                <CardDescription className="text-gray-500 text-sm mb-3 line-clamp-2">
+                  {description}
+                </CardDescription>
+                <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                  <span>{tags.length} tags</span>
+                  <span>•</span>
+                  <span>{author.name}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+        <LinkActionModal
+          open={editModalOpen}
+          handleClose={() => setEditModalOpen(false)}
+          mode="edit"
+          initialData={{
+            title,
+            description,
+            linkUrl,
+            tags,
+          }}
+          onSubmit={(input) => {
+            editLink({ id, body: input });
+          }}
+          isPending={isPending}
+        />
+      </>
+    );
+  }
 
   return (
     <Card className="bg-white rounded-2xl shadow-lg max-w-xs flex flex-col items-stretch transition-shadow hover:shadow-xl p-0">
@@ -129,7 +238,9 @@ export default function LinkCard({
                 variant="ghost"
                 size="sm"
                 className="text-gray-400 hover:text-gray-600 h-8 px-2"
-                onClick={() => setDeletePopover(true)}
+                onClick={() => {
+                  setDeletePopover(true);
+                }}
               >
                 <Trash2Icon className="w-4 h-4" />
               </Button>

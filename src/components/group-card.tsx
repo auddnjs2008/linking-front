@@ -13,7 +13,6 @@ import {
   BookmarkPlusIcon,
   BookmarkCheckIcon,
   Trash2Icon,
-  EllipsisVerticalIcon,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +28,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useDeleteGroupMutation } from "@/hooks/rqhooks/group/useDeleteGroupMutation";
 import DeletePopover from "./delete-popover";
+import type { ViewMode } from "@/contexts/ViewModeContext";
 
 type GroupCardProps = {
   id: number;
@@ -38,6 +38,7 @@ type GroupCardProps = {
   createdDate: string;
   author: User;
   isBookmarked: boolean;
+  viewMode?: ViewMode;
 };
 
 export default function GroupCard({
@@ -48,6 +49,7 @@ export default function GroupCard({
   createdDate,
   author,
   isBookmarked,
+  viewMode = "grid",
 }: GroupCardProps) {
   const navigate = useNavigate();
   const { data: currentUser } = useMeQuery();
@@ -84,66 +86,169 @@ export default function GroupCard({
     navigate(`/groups/${id}`);
   };
 
+  if (viewMode === "list") {
+    return (
+      <>
+        <Card
+          onClick={handleViewGroup}
+          className="bg-white cursor-pointer rounded-2xl shadow-lg transition-shadow hover:shadow-xl p-0"
+        >
+          <div className="flex items-center p-4">
+            {/* 왼쪽 콘텐츠 영역 */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between mb-2">
+                <CardTitle className="font-bold text-gray-900 text-lg mb-1 truncate flex-1 min-w-0">
+                  {title}
+                </CardTitle>
+                <div className="flex gap-1 ml-2 flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-gray-400 hover:text-gray-600 h-8 w-8 p-0"
+                    onClick={!isBookmarked ? handleBookmark : handleUnBookmark}
+                  >
+                    {!isBookmarked ? (
+                      <BookmarkPlusIcon className="size-4 text-red-400" />
+                    ) : (
+                      <BookmarkCheckIcon className="size-4 text-green-400" />
+                    )}
+                  </Button>
+                  {author.id === currentUser?.id && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-gray-400 hover:text-gray-600 h-8 w-8 p-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditModalOpen(true);
+                      }}
+                    >
+                      <EditIcon className="w-4 h-4" />
+                    </Button>
+                  )}
+                  {author.id === currentUser?.id && (
+                    <DeletePopover
+                      mode="group"
+                      title={title}
+                      open={deletePopover}
+                      handleClose={() => setDeletePopover(false)}
+                      handleDelete={handleDelete}
+                      isLoading={deletePending}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:text-gray-600 h-8 w-8 p-0"
+                        onClick={() => setDeletePopover(true)}
+                      >
+                        <Trash2Icon className="w-4 h-4" />
+                      </Button>
+                    </DeletePopover>
+                  )}
+                </div>
+              </div>
+              <CardDescription className="text-gray-500 text-sm mb-3 line-clamp-1">
+                {description}
+              </CardDescription>
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex items-center gap-1">
+                  <LinkIcon className="w-4 h-4" />
+                  <span>{linkedLinks.length} links</span>
+                </div>
+                <span>•</span>
+                <span>{getRelativeTime(createdDate)}</span>
+                <span>•</span>
+                <div className="flex items-center gap-1">
+                  <Avatar className="w-4 h-4">
+                    <AvatarImage src={author.profile} />
+                    <AvatarFallback>{author.name}</AvatarFallback>
+                  </Avatar>
+                  <span>{author.name}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+        <GroupActionModal
+          open={editModalOpen}
+          handleClose={() => setEditModalOpen(false)}
+          mode="edit"
+          initalData={{
+            title,
+            description,
+            selectedLinks: linkedLinks,
+          }}
+          onSubmit={(input) => {
+            editGroup({
+              id,
+              body: {
+                title: input.title,
+                description: input.description,
+                linkIds: input.selectedLinks.map((link) => link.id),
+              },
+            });
+          }}
+          isPending={isPending}
+        />
+      </>
+    );
+  }
+
   return (
-    <Card className="bg-white rounded-2xl shadow-lg max-w-sm flex flex-col items-stretch transition-shadow hover:shadow-xl p-0">
+    <Card className="bg-white rounded-2xl shadow-lg max-w-xl flex flex-col items-stretch transition-shadow hover:shadow-xl p-0">
       <CardHeader className="pt-5 pb-2 px-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="font-bold text-gray-900 text-lg mb-1 truncate">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-start justify-between gap-2">
+            <CardTitle className="font-bold text-gray-900 text-lg mb-1 truncate flex-1 min-w-0">
               {title}
             </CardTitle>
-            <CardDescription className="text-gray-500 text-base mb-2 line-clamp-2">
-              {description}
-            </CardDescription>
-          </div>
-          <div>
-            <Button variant="ghost" size="sm">
-              <EllipsisVerticalIcon className="size-4" />
-            </Button>
-          </div>
-
-          {/* <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-gray-400 hover:text-gray-600"
-              onClick={!isBookmarked ? handleBookmark : handleUnBookmark}
-            >
-              {!isBookmarked ? (
-                <BookmarkPlusIcon className="size-4 text-red-400" />
-              ) : (
-                <BookmarkCheckIcon className="size-4 text-green-400" />
-              )}
-            </Button>
-            {author.id === currentUser?.id && (
+            <div className="flex gap-1 flex-shrink-0">
               <Button
-                variant="ghost"
-                className="text-gray-400 hover:text-gray-600"
-                onClick={() => setEditModalOpen(true)}
+                variant="outline"
+                size="sm"
+                className="text-gray-400 hover:text-gray-600 h-8 w-8 p-0"
+                onClick={!isBookmarked ? handleBookmark : handleUnBookmark}
               >
-                <EditIcon className="w-4 h-4" />
+                {!isBookmarked ? (
+                  <BookmarkPlusIcon className="size-4 text-red-400" />
+                ) : (
+                  <BookmarkCheckIcon className="size-4 text-green-400" />
+                )}
               </Button>
-            )}
-            {author.id === currentUser?.id && (
-              <DeletePopover
-                mode="group"
-                title={title}
-                open={deletePopover}
-                handleClose={() => setDeletePopover(false)}
-                handleDelete={handleDelete}
-                isLoading={deletePending}
-              >
+              {author.id === currentUser?.id && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-gray-400 hover:text-gray-600 h-8 px-2"
-                  onClick={() => setDeletePopover(true)}
+                  className="text-gray-400 hover:text-gray-600 h-8 w-8 p-0"
+                  onClick={() => setEditModalOpen(true)}
                 >
-                  <Trash2Icon className="w-4 h-4" />
+                  <EditIcon className="w-4 h-4" />
                 </Button>
-              </DeletePopover>
-            )}
-          </div> */}
+              )}
+              {author.id === currentUser?.id && (
+                <DeletePopover
+                  mode="group"
+                  title={title}
+                  open={deletePopover}
+                  handleClose={() => setDeletePopover(false)}
+                  handleDelete={handleDelete}
+                  isLoading={deletePending}
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-400 hover:text-gray-600 h-8 w-8 p-0"
+                    onClick={() => setDeletePopover(true)}
+                  >
+                    <Trash2Icon className="w-4 h-4" />
+                  </Button>
+                </DeletePopover>
+              )}
+            </div>
+          </div>
+          <CardDescription className="text-gray-500 text-base mb-2 line-clamp-2">
+            {description}
+          </CardDescription>
         </div>
       </CardHeader>
 

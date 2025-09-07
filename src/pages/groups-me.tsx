@@ -9,9 +9,11 @@ import { useUserGroupPaginationUtils } from "@/hooks/rqhooks/group/useUserGroupP
 import { useMeQuery } from "@/hooks/rqhooks/user/useMeQuery";
 import { LinkIcon, Plus } from "lucide-react";
 import { useState } from "react";
+import { useViewMode } from "@/contexts/ViewModeContext";
 
 export default function MyGroupPage() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const { viewMode } = useViewMode();
 
   const { data: user, isLoading: userLoading, error: userError } = useMeQuery();
 
@@ -162,7 +164,13 @@ export default function MyGroupPage() {
           총 {allGroups?.length}개의 링크가 있습니다
         </p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div
+        className={
+          viewMode === "grid"
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            : "flex flex-col gap-3"
+        }
+      >
         {allGroups?.map((group, index) => (
           <GroupCard
             key={index}
@@ -173,6 +181,7 @@ export default function MyGroupPage() {
             createdDate={group.createdAt}
             author={group.author}
             isBookmarked={group.isBookmarked}
+            viewMode={viewMode}
           />
         ))}
         {/* 페이지네이션 옵저버 */}

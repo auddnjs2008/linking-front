@@ -4,8 +4,12 @@ import { useLinkPaginationUtils } from "@/hooks/rqhooks/link/useLinkPaginationQu
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Link as LinkIcon } from "lucide-react";
+import { useViewMode } from "@/contexts/ViewModeContext";
+import ButtonController from "@/components/button-controller";
 
 export default function Home() {
+  const { viewMode } = useViewMode();
+
   const { allLinks, hasNextPage, fetchNextPage, isLoading, error } =
     useLinkPaginationUtils(10, "ASC");
 
@@ -71,7 +75,13 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div
+        className={
+          viewMode === "grid"
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            : "flex flex-col gap-3"
+        }
+      >
         {allLinks.map((link) => (
           <LinkCard
             key={link.id}
@@ -86,9 +96,9 @@ export default function Home() {
             isBookmarked={link.isBookmarked}
             linkUrl={link.linkUrl}
             tags={link.tags}
+            viewMode={viewMode}
           />
         ))}
-
         {/* 페이지네이션 옵저버 */}
         {hasNextPage && (
           <PaginationObserver
@@ -97,6 +107,7 @@ export default function Home() {
           />
         )}
       </div>
+      <ButtonController type="link" />
     </div>
   );
 }

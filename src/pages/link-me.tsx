@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useCreateLinkMutation } from "@/hooks/rqhooks/link/useCreateLinkMutation";
 import LinkActionModal from "@/components/link-action-modal";
+import { useViewMode } from "@/contexts/ViewModeContext";
 
 export default function LinkMe() {
   const { data: user, isLoading: userLoading, error: userError } = useMeQuery();
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const { viewMode } = useViewMode();
 
   const { mutate: createLink, isPending } = useCreateLinkMutation();
 
@@ -145,7 +147,13 @@ export default function LinkMe() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div
+        className={
+          viewMode === "grid"
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            : "flex flex-col gap-3"
+        }
+      >
         {allLinks.map((link) => (
           <LinkCard
             key={link.id}
@@ -160,6 +168,7 @@ export default function LinkMe() {
             description={link.description}
             author={link.author}
             isBookmarked={link.isBookmarked}
+            viewMode={viewMode}
           />
         ))}
       </div>

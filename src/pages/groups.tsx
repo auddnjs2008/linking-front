@@ -1,11 +1,15 @@
+import ButtonController from "@/components/button-controller";
 import GroupCard from "@/components/group-card";
 import { PaginationObserver } from "@/components/pagination-observer";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { useViewMode } from "@/contexts/ViewModeContext";
 import { useGroupPaginationUtils } from "@/hooks/rqhooks/group/useGroupPaginationQuery";
 import { LinkIcon } from "lucide-react";
 
 export default function GroupPage() {
+  const { viewMode } = useViewMode();
+
   const { allGroups, hasNextPage, fetchNextPage, isLoading, error } =
     useGroupPaginationUtils(10, "ASC");
 
@@ -74,7 +78,14 @@ export default function GroupPage() {
           총 {allGroups.length}개의 링크가 있습니다
         </p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div
+        className={
+          viewMode === "grid"
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            : "flex flex-col gap-3"
+        }
+      >
+        {" "}
         {allGroups.map((group, index) => (
           <GroupCard
             key={index}
@@ -85,6 +96,7 @@ export default function GroupPage() {
             createdDate={group.createdAt}
             author={group.author}
             isBookmarked={group.isBookmarked}
+            viewMode={viewMode}
           />
         ))}
         {/* 페이지네이션 옵저버 */}
@@ -95,6 +107,7 @@ export default function GroupPage() {
           />
         )}
       </div>
+      <ButtonController type="group" />
     </div>
   );
 }
