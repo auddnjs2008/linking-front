@@ -4,6 +4,7 @@ type ReqGetGroupByPagination = {
   id?: number;
   order: "ASC" | "DESC";
   take: number;
+  keyword: string;
 };
 
 type ResGetGroupByPagination = {

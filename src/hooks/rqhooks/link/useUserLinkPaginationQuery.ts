@@ -6,11 +6,17 @@ type Props = {
   take: number;
   order: "ASC" | "DESC";
   userId?: number; // 훅에서는 optional
+  keyword: string;
 };
 
-export const useUserLinkPaginationQuery = ({ take, order, userId }: Props) => {
+export const useUserLinkPaginationQuery = ({
+  take,
+  order,
+  userId,
+  keyword,
+}: Props) => {
   return useInfiniteQuery({
-    queryKey: RQlinkKey.userLinks({ take, order, userId }),
+    queryKey: RQlinkKey.userLinks({ take, order, userId, keyword }),
     queryFn: ({ pageParam }) => {
       // enabled 옵션으로 userId가 있을 때만 실행되므로 안전
       return getUserLinkByPagination({
@@ -19,6 +25,7 @@ export const useUserLinkPaginationQuery = ({ take, order, userId }: Props) => {
           take,
           id: pageParam ?? 0,
           order,
+          keyword,
         },
       });
     },

@@ -7,6 +7,7 @@ type ReqGetUserLinkByPagination = {
     take: number;
     order: "ASC" | "DESC";
     id: number;
+    keyword: string;
   };
 };
 

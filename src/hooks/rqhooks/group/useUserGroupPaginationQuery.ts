@@ -6,11 +6,17 @@ type Props = {
   take: number;
   order: "ASC" | "DESC";
   userId?: number;
+  keyword: string;
 };
 
-export const useUserGroupPaginationQuery = ({ take, order, userId }: Props) => {
+export const useUserGroupPaginationQuery = ({
+  take,
+  order,
+  userId,
+  keyword,
+}: Props) => {
   return useInfiniteQuery({
-    queryKey: RQgroupKey.userGroups({ take, order, userId }),
+    queryKey: RQgroupKey.userGroups({ take, order, userId, keyword }),
     queryFn: ({ pageParam }) => {
       return getUserGroupByPagination({
         userId: userId as number,
@@ -18,6 +24,7 @@ export const useUserGroupPaginationQuery = ({ take, order, userId }: Props) => {
           take,
           id: pageParam ?? 0,
           order,
+          keyword,
         },
       });
     },

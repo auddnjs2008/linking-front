@@ -4,15 +4,17 @@ import { getGroupByPagination } from "@/service/group/getGroupByPagination";
 
 export const useGropuPaginationQuery = (
   take: number,
-  order: "ASC" | "DESC"
+  order: "ASC" | "DESC",
+  keyword: string
 ) => {
   return useInfiniteQuery({
-    queryKey: RQgroupKey.groups(take, order),
+    queryKey: RQgroupKey.groups(take, order, keyword),
     queryFn: ({ pageParam }) =>
       getGroupByPagination({
         take,
         id: pageParam ?? 0,
         order,
+        keyword,
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
@@ -22,9 +24,10 @@ export const useGropuPaginationQuery = (
 
 export const useGroupPaginationUtils = (
   take: number,
-  order: "ASC" | "DESC"
+  order: "ASC" | "DESC",
+  keyword: string
 ) => {
-  const query = useGropuPaginationQuery(take, order);
+  const query = useGropuPaginationQuery(take, order, keyword);
 
   const allGroups = query.data?.pages.flatMap((page) => page.data) ?? [];
 

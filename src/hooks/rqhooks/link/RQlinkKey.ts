@@ -9,10 +9,12 @@ export const RQlinkKey = {
     take,
     order,
     userId,
+    keyword,
   }: {
     take: number;
     order: "ASC" | "DESC";
     userId?: number; // optional로 변경
+    keyword: string;
   }) =>
     [
       "link",
@@ -21,6 +23,7 @@ export const RQlinkKey = {
       userId ?? "no-user", // undefined인 경우 "no-user" 사용
       take,
       order,
+      keyword,
     ] as const,
 
   linkDetail: (id: number) => ["link", "detail", id] as const,

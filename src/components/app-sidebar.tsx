@@ -1,4 +1,4 @@
-import { Archive, Folder, Home, Inbox, Search } from "lucide-react";
+import { Archive, Folder, Home, Inbox } from "lucide-react";
 
 import {
   Sidebar,
@@ -35,11 +35,6 @@ export const menuItems = [
     title: "MyGroups",
     url: "/groups/me",
     icon: Archive,
-  },
-  {
-    title: "Search",
-    url: "#",
-    icon: Search,
   },
 ];
 
