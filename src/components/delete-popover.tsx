@@ -3,7 +3,8 @@ import { Button } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { InlineSpinner } from "./ui/spinner";
 
-export default function LinkDeletePopover({
+export default function DeletePopover({
+  mode,
   title,
   open,
   handleClose,
@@ -11,6 +12,7 @@ export default function LinkDeletePopover({
   children,
   isLoading,
 }: {
+  mode: "link" | "group";
   title: string;
   open: boolean;
   handleClose: () => void;
@@ -25,10 +27,12 @@ export default function LinkDeletePopover({
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Trash2Icon className="w-5 h-5 text-red-400" />
-            <h4 className="font-semibold text-gray-900">링크 삭제</h4>
+            <h4 className="font-semibold text-gray-900">
+              {mode === "link" ? "링크 삭제" : "그룹 삭제"}
+            </h4>
           </div>
           <p className="text-sm text-gray-600">
-            정말로 이 링크를 삭제하시겠습니까?
+            정말로 삭제하시겠습니까?
             <br />
             <span className="font-medium text-gray-800">"{title}"</span>
           </p>

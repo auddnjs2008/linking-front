@@ -12,6 +12,8 @@ import {
   EditIcon,
   BookmarkPlusIcon,
   BookmarkCheckIcon,
+  Trash2Icon,
+  EllipsisVerticalIcon,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
@@ -25,6 +27,8 @@ import GroupActionModal from "./group-action-modal";
 import { useUpdateGroupMutation } from "@/hooks/rqhooks/group/useUpdateGroupMutation";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useDeleteGroupMutation } from "@/hooks/rqhooks/group/useDeleteGroupMutation";
+import DeletePopover from "./delete-popover";
 
 type GroupCardProps = {
   id: number;
@@ -52,7 +56,11 @@ export default function GroupCard({
 
   const { mutate: unbookmark } = useGroupUnBookmarkMutation();
 
+  const { mutate: deleteGroup, isPending: deletePending } =
+    useDeleteGroupMutation();
+
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deletePopover, setDeletePopover] = useState(false);
 
   const { mutate: editGroup, isPending } = useUpdateGroupMutation(() => {
     setEditModalOpen(false);
@@ -65,6 +73,11 @@ export default function GroupCard({
   };
   const handleUnBookmark = () => {
     unbookmark({ id });
+  };
+
+  const handleDelete = () => {
+    deleteGroup({ id });
+    setDeletePopover(false);
   };
 
   const handleViewGroup = () => {
@@ -83,7 +96,13 @@ export default function GroupCard({
               {description}
             </CardDescription>
           </div>
-          <div className="flex gap-2">
+          <div>
+            <Button variant="ghost" size="sm">
+              <EllipsisVerticalIcon className="size-4" />
+            </Button>
+          </div>
+
+          {/* <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -105,7 +124,26 @@ export default function GroupCard({
                 <EditIcon className="w-4 h-4" />
               </Button>
             )}
-          </div>
+            {author.id === currentUser?.id && (
+              <DeletePopover
+                mode="group"
+                title={title}
+                open={deletePopover}
+                handleClose={() => setDeletePopover(false)}
+                handleDelete={handleDelete}
+                isLoading={deletePending}
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-400 hover:text-gray-600 h-8 px-2"
+                  onClick={() => setDeletePopover(true)}
+                >
+                  <Trash2Icon className="w-4 h-4" />
+                </Button>
+              </DeletePopover>
+            )}
+          </div> */}
         </div>
       </CardHeader>
 

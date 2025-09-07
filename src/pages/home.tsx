@@ -3,7 +3,7 @@ import { PaginationObserver } from "@/components/pagination-observer";
 import { useLinkPaginationUtils } from "@/hooks/rqhooks/link/useLinkPaginationQuery";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
-import { Plus, Link as LinkIcon } from "lucide-react";
+import { Link as LinkIcon } from "lucide-react";
 
 export default function Home() {
   const { allLinks, hasNextPage, fetchNextPage, isLoading, error } =
@@ -56,11 +56,6 @@ export default function Home() {
             흥미로운 링크를 발견했다면 저장해보세요. 나중에 쉽게 찾아볼 수
             있습니다.
           </p>
-          <div className="space-y-3">
-            <Button className="w-full" size="lg">
-              <Plus className="w-4 h-4 mr-2" />첫 번째 링크 저장하기
-            </Button>
-          </div>
         </div>
       </div>
     );

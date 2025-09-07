@@ -3,7 +3,7 @@ import { PaginationObserver } from "@/components/pagination-observer";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useGroupPaginationUtils } from "@/hooks/rqhooks/group/useGroupPaginationQuery";
-import { LinkIcon, Plus } from "lucide-react";
+import { LinkIcon } from "lucide-react";
 
 export default function GroupPage() {
   const { allGroups, hasNextPage, fetchNextPage, isLoading, error } =
@@ -55,11 +55,11 @@ export default function GroupPage() {
           <p className="text-gray-600 mb-6 leading-relaxed">
             그룹을 만들어보세요. 나중에 쉽게 찾아볼 수 있습니다.
           </p>
-          <div className="space-y-3">
+          {/* <div className="space-y-3">
             <Button className="w-full" size="lg">
               <Plus className="w-4 h-4 mr-2" />첫 번째 그룹 만들기
             </Button>
-          </div>
+          </div> */}
         </div>
       </div>
     );

@@ -24,7 +24,7 @@ import { useState } from "react";
 import { useUpdateLinkMutation } from "@/hooks/rqhooks/link/useUpdateLinkMutation";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import LinkDeletePopover from "./link-delete-popover";
+import DeletePopover from "./delete-popover";
 import { useDeleteLinkMutation } from "@/hooks/rqhooks/link/useDeleteLinkMutation";
 
 type LinkCardProps = {
@@ -117,7 +117,8 @@ export default function LinkCard({
             </Button>
           )}
           {author.id === currentUser?.id && (
-            <LinkDeletePopover
+            <DeletePopover
+              mode="link"
               title={title}
               open={deletePopover}
               handleClose={() => setDeletePopover(false)}
@@ -132,7 +133,7 @@ export default function LinkCard({
               >
                 <Trash2Icon className="w-4 h-4" />
               </Button>
-            </LinkDeletePopover>
+            </DeletePopover>
           )}
         </div>
       </div>

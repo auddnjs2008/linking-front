@@ -1,14 +1,21 @@
 import ButtonController from "@/components/button-controller";
+import GroupActionModal from "@/components/group-action-modal";
 import GroupCard from "@/components/group-card";
 import { PaginationObserver } from "@/components/pagination-observer";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { useCreateGroupMutation } from "@/hooks/rqhooks/group/useCreateGroupMutation";
 import { useUserGroupPaginationUtils } from "@/hooks/rqhooks/group/useUserGroupPaginationQuery";
 import { useMeQuery } from "@/hooks/rqhooks/user/useMeQuery";
 import { LinkIcon, Plus } from "lucide-react";
+import { useState } from "react";
 
 export default function MyGroupPage() {
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+
   const { data: user, isLoading: userLoading, error: userError } = useMeQuery();
+
+  const { mutate: createGroup, isPending } = useCreateGroupMutation();
 
   const {
     allGroups,
@@ -117,12 +124,31 @@ export default function MyGroupPage() {
             그룹을 만들어보세요. 나중에 쉽게 찾아볼 수 있습니다.
           </p>
           <div className="space-y-3">
-            <Button className="w-full" size="lg">
+            <Button
+              onClick={() => {
+                setCreateModalOpen(true);
+              }}
+              className="w-full"
+              size="lg"
+            >
               <Plus className="w-4 h-4 mr-2" />첫 번째 그룹 만들기
             </Button>
           </div>
         </div>
         <ButtonController type="group" />
+        <GroupActionModal
+          open={createModalOpen}
+          handleClose={() => setCreateModalOpen(false)}
+          isPending={isPending}
+          mode="create"
+          onSubmit={(input) => {
+            createGroup({
+              title: input.title,
+              description: input.description,
+              linkIds: input.selectedLinks.map((l) => l.id),
+            });
+          }}
+        />
       </div>
     );
   }

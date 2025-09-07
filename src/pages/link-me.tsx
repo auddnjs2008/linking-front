@@ -5,9 +5,15 @@ import { useUserLinkPaginationUtils } from "@/hooks/rqhooks/link/useUserLinkPagi
 import { Spinner } from "@/components/ui/spinner";
 import { LinkIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useCreateLinkMutation } from "@/hooks/rqhooks/link/useCreateLinkMutation";
+import LinkActionModal from "@/components/link-action-modal";
 
 export default function LinkMe() {
   const { data: user, isLoading: userLoading, error: userError } = useMeQuery();
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+
+  const { mutate: createLink, isPending } = useCreateLinkMutation();
 
   const {
     allLinks,
@@ -119,6 +125,13 @@ export default function LinkMe() {
           </div>
         </div>
         <ButtonController type="link" />
+        <LinkActionModal
+          mode="create"
+          open={createModalOpen}
+          handleClose={() => setCreateModalOpen(false)}
+          isPending={isPending}
+          onSubmit={(input) => createLink(input)}
+        />
       </div>
     );
   }
