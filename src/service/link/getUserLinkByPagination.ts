@@ -8,6 +8,10 @@ type ReqGetUserLinkByPagination = {
     order: "ASC" | "DESC";
     id: number;
     keyword: string;
+    startDate?: string;
+    endDate?: string;
+    isBookmarked?: boolean;
+    hasThumbnail?: boolean;
   };
 };
 

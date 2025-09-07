@@ -6,6 +6,10 @@ type ReqGetSearchLinkByPagination = {
   id: number;
   order: "ASC" | "DESC";
   take: number;
+  startDate?: string;
+  endDate?: string;
+  isBookmarked?: boolean;
+  hasThumbnail?: boolean;
 };
 
 type ResGetSearchLinkByPagination = {
