@@ -22,8 +22,21 @@ export default function DeletePopover({
 }) {
   return (
     <Popover open={open}>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="w-64 p-4">
+      <PopoverTrigger asChild>
+        <div
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          {children}
+        </div>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 p-4" onClick={(e) => e.stopPropagation()}>
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Trash2Icon className="w-5 h-5 text-red-400" />
@@ -41,7 +54,10 @@ export default function DeletePopover({
               variant="outline"
               size="sm"
               className="flex-1"
-              onClick={handleClose}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClose();
+              }}
             >
               취소
             </Button>
@@ -50,7 +66,10 @@ export default function DeletePopover({
               size="sm"
               className="flex-1"
               disabled={isLoading}
-              onClick={handleDelete}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete();
+              }}
             >
               {isLoading && <InlineSpinner />}
               삭제
