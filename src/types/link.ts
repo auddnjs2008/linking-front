@@ -9,3 +9,7 @@ export type Link = {
   updatedAt: string;
   isBookmarked: boolean;
 };
+
+export type BookmarkFilter = "all" | "bookmarked" | "notBookmarked";
+
+export type ThumbnailFilter = "all" | "withThumbnail" | "withoutThumbnail";

@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import type { BookmarkFilter, ThumbnailFilter } from "@/types/link";
 
 interface LinkGroupFilterProps {
   value: string;
@@ -27,12 +28,10 @@ interface LinkGroupFilterProps {
   placeholder?: string;
   className?: string;
   // 필터 상태들
-  isBookmarked?: "all" | "bookmarked" | "notBookmarked";
-  onBookmarkedChange?: (value: "all" | "bookmarked" | "notBookmarked") => void;
-  hasThumbnail?: "all" | "withThumbnail" | "withoutThumbnail";
-  onThumbnailChange?: (
-    value: "all" | "withThumbnail" | "withoutThumbnail"
-  ) => void;
+  isBookmarked?: BookmarkFilter;
+  onBookmarkedChange?: (value: BookmarkFilter) => void;
+  hasThumbnail?: ThumbnailFilter;
+  onThumbnailChange?: (value: ThumbnailFilter) => void;
   // 날짜 필터들
   startDate?: Date | undefined;
   onStartDateChange?: (date: Date | undefined) => void;
@@ -121,47 +120,11 @@ const LinkGroupFilter = memo(function LinkGroupFilter({
   };
 
   return (
-    <div className="space-y-3">
-      {/* 필터 태그들 */}
-      {hasActiveFilters() && (
-        <div className="flex flex-wrap items-center gap-2 p-3 bg-gray-50 rounded-lg">
-          <span className="text-sm font-medium text-gray-700">
-            적용된 필터:
-          </span>
-          {getFilterTags().map((tag) => (
-            <div
-              key={tag.key}
-              className="inline-flex items-center gap-1 px-2 py-1 bg-gray-200 text-gray-700 rounded-md text-xs"
-            >
-              <span>{tag.label}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-4 w-4 p-0 hover:bg-gray-300 rounded-full"
-                onClick={tag.onRemove}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
-          ))}
-          {onReset && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onReset}
-              className="h-6 px-2 text-xs text-gray-600 hover:text-gray-800"
-            >
-              <RotateCcw className="h-3 w-3 mr-1" />
-              모두 초기화
-            </Button>
-          )}
-        </div>
-      )}
-
-      {/* 필터 컨트롤들 */}
-      <div className="space-y-6">
+    <div className="space-y-6">
+      {/* 검색 필터와 필터 태그들을 한 줄에 배치 */}
+      <div className="flex flex-col lg:flex-row gap-4">
         {/* 검색 필터 - 카드 형태 */}
-        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex-1">
           <Label
             htmlFor="title"
             className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2"
@@ -181,6 +144,54 @@ const LinkGroupFilter = memo(function LinkGroupFilter({
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           </div>
         </div>
+
+        {/* 필터 태그들 - 검색 옆에 고정 */}
+        <div className="lg:w-[700px] flex-shrink-0">
+          {hasActiveFilters() ? (
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 h-full">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-medium text-gray-700 w-full mb-2">
+                  적용된 필터:
+                </span>
+                {getFilterTags().map((tag) => (
+                  <div
+                    key={tag.key}
+                    className="inline-flex items-center gap-1 px-2 py-1 bg-gray-200 text-gray-700 rounded-md text-xs"
+                  >
+                    <span>{tag.label}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 hover:bg-gray-300 rounded-full"
+                      onClick={tag.onRemove}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+                {onReset && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onReset}
+                    className="h-6 px-2 text-xs text-gray-600 hover:text-gray-800 mt-2"
+                  >
+                    <RotateCcw className="h-3 w-3 mr-1" />
+                    모두 초기화
+                  </Button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 h-full flex items-center justify-center">
+              <span className="text-sm text-gray-500">필터를 적용해보세요</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 필터 컨트롤들 */}
+      <div className="space-y-6">
         {/* 필터 그룹들 - 각각 카드 형태 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 시작 날짜 필터 */}

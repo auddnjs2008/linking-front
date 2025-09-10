@@ -7,6 +7,10 @@ type Props = {
   order: "ASC" | "DESC";
   userId?: number; // 훅에서는 optional
   keyword: string;
+  startDate?: string;
+  endDate?: string;
+  isBookmarked?: boolean;
+  hasThumbnail?: boolean;
 };
 
 export const useUserLinkPaginationQuery = ({
@@ -14,9 +18,22 @@ export const useUserLinkPaginationQuery = ({
   order,
   userId,
   keyword,
+  startDate,
+  endDate,
+  isBookmarked,
+  hasThumbnail,
 }: Props) => {
   return useInfiniteQuery({
-    queryKey: RQlinkKey.userLinks({ take, order, userId, keyword }),
+    queryKey: RQlinkKey.userLinks({
+      take,
+      order,
+      userId,
+      keyword,
+      startDate,
+      endDate,
+      isBookmarked,
+      hasThumbnail,
+    }),
     queryFn: ({ pageParam }) => {
       // enabled 옵션으로 userId가 있을 때만 실행되므로 안전
       return getUserLinkByPagination({
@@ -26,6 +43,10 @@ export const useUserLinkPaginationQuery = ({
           id: pageParam ?? 0,
           order,
           keyword,
+          startDate,
+          endDate,
+          isBookmarked,
+          hasThumbnail,
         },
       });
     },

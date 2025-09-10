@@ -9,6 +9,7 @@ import ButtonController from "@/components/button-controller";
 import LinkGroupFilter from "@/components/link-group-filter";
 import { useState } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
+import type { BookmarkFilter, ThumbnailFilter } from "@/types/link";
 
 export default function Home() {
   const { viewMode } = useViewMode();
@@ -18,12 +19,59 @@ export default function Home() {
   // 검색 키워드가 있는지 확인
   const isSearching = debouncedSearchKeyword.trim().length > 0;
 
+  //filter 관련
+
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const [isBookmarked, setIsBookmarked] = useState<BookmarkFilter>("all");
+  const [hasThumbnail, setHasThumbnail] = useState<ThumbnailFilter>("all");
+
+  const handleDateChange = (type: "start" | "end") => (date?: Date) => {
+    if (type === "start") {
+      setStartDate(date ? date.toISOString().split("T")[0] : "");
+    } else {
+      setEndDate(date ? date.toISOString().split("T")[0] : "");
+    }
+  };
+
+  const handleBookmarkedChange = (filterStatus: BookmarkFilter) => {
+    setIsBookmarked(filterStatus);
+  };
+
+  const handleThumbnailChange = (filterStatus: ThumbnailFilter) => {
+    setHasThumbnail(filterStatus);
+  };
+
+  // 필터 상태를 적절한 타입으로 변환
+  const getBookmarkedFilter = (): boolean | undefined => {
+    if (isBookmarked === "all") return undefined;
+    return isBookmarked === "bookmarked";
+  };
+
+  const getThumbnailFilter = (): boolean | undefined => {
+    if (hasThumbnail === "all") return undefined;
+    return hasThumbnail === "withThumbnail";
+  };
+
+  const getStartDateFilter = (): string | undefined => {
+    return startDate.trim() === "" ? undefined : startDate;
+  };
+
+  const getEndDateFilter = (): string | undefined => {
+    return endDate.trim() === "" ? undefined : endDate;
+  };
+
   // 하나의 쿼리로 모든 경우 처리 (빈 키워드일 때는 모든 링크 반환)
   const { allLinks, hasNextPage, fetchNextPage, isLoading, error } =
     useSearchLinkPaginationUtils({
       take: 10,
       order: "ASC",
       keyword: debouncedSearchKeyword,
+      startDate: getStartDateFilter(),
+      endDate: getEndDateFilter(),
+      isBookmarked: getBookmarkedFilter(),
+      hasThumbnail: getThumbnailFilter(),
     });
 
   // 에러 상태
@@ -73,6 +121,14 @@ export default function Home() {
         <LinkGroupFilter
           value={searchKeyword}
           onChange={setSearchKeyword}
+          startDate={startDate ? new Date(startDate) : undefined}
+          endDate={endDate ? new Date(endDate) : undefined}
+          hasThumbnail={hasThumbnail}
+          isBookmarked={isBookmarked}
+          onBookmarkedChange={handleBookmarkedChange}
+          onStartDateChange={handleDateChange("start")}
+          onEndDateChange={handleDateChange("end")}
+          onThumbnailChange={handleThumbnailChange}
           className="max-w-md"
         />
 
