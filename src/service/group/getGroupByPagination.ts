@@ -5,6 +5,10 @@ type ReqGetGroupByPagination = {
   order: "ASC" | "DESC";
   take: number;
   keyword: string;
+  startDate?: string;
+  endDate?: string;
+  isBookmarked?: boolean;
+  hasThumbnail?: boolean;
 };
 
 type ResGetGroupByPagination = {

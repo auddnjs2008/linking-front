@@ -12,6 +12,8 @@ import { LinkIcon, Plus, Search, X } from "lucide-react";
 import { useState } from "react";
 import { useViewMode } from "@/contexts/ViewModeContext";
 import { useDebounce } from "@/hooks/useDebounce";
+import type { BookmarkFilter } from "@/types/link";
+import { formatDateToKorean } from "@/utils/formatDateToKorean";
 
 export default function MyGroupPage() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -26,6 +28,34 @@ export default function MyGroupPage() {
   // 검색 키워드가 있는지 확인
   const isSearching = debouncedSearchKeyword.trim().length > 0;
 
+  //filter 관련
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [isBookmarked, setIsBookmarked] = useState<BookmarkFilter>("all");
+
+  const handleDateChange = (type: "start" | "end") => (date?: Date) => {
+    if (type === "start") {
+      setStartDate(date ? formatDateToKorean(date) : "");
+    } else {
+      setEndDate(date ? formatDateToKorean(date) : "");
+    }
+  };
+
+  const handleBookmarkedChange = (filterStatus: BookmarkFilter) => {
+    setIsBookmarked(filterStatus);
+  };
+  const getBookmarkedFilter = (): boolean | undefined => {
+    if (isBookmarked === "all") return undefined;
+    return isBookmarked === "bookmarked";
+  };
+  const getStartDateFilter = (): string | undefined => {
+    return startDate.trim() === "" ? undefined : startDate;
+  };
+
+  const getEndDateFilter = (): string | undefined => {
+    return endDate.trim() === "" ? undefined : endDate;
+  };
+
   const {
     allGroups,
     hasNextPage,
@@ -37,6 +67,9 @@ export default function MyGroupPage() {
     take: 10,
     order: "ASC",
     keyword: debouncedSearchKeyword,
+    startDate: getStartDateFilter(),
+    endDate: getEndDateFilter(),
+    isBookmarked: getBookmarkedFilter(),
   });
 
   // 사용자 정보 로딩 중
@@ -133,6 +166,12 @@ export default function MyGroupPage() {
           value={searchKeyword}
           onChange={setSearchKeyword}
           placeholder="그룹 제목으로 검색..."
+          startDate={startDate ? new Date(startDate) : undefined}
+          endDate={endDate ? new Date(endDate) : undefined}
+          isBookmarked={isBookmarked}
+          onBookmarkedChange={handleBookmarkedChange}
+          onStartDateChange={handleDateChange("start")}
+          onEndDateChange={handleDateChange("end")}
           className="max-w-md"
         />
 

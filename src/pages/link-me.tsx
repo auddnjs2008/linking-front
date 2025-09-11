@@ -13,6 +13,7 @@ import LinkGroupFilter from "@/components/link-group-filter";
 import { useViewMode } from "@/contexts/ViewModeContext";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { BookmarkFilter, ThumbnailFilter } from "@/types/link";
+import { formatDateToKorean } from "@/utils/formatDateToKorean";
 
 export default function LinkMe() {
   const { data: user, isLoading: userLoading, error: userError } = useMeQuery();
@@ -36,9 +37,9 @@ export default function LinkMe() {
 
   const handleDateChange = (type: "start" | "end") => (date?: Date) => {
     if (type === "start") {
-      setStartDate(date ? date.toISOString().split("T")[0] : "");
+      setStartDate(date ? formatDateToKorean(date) : "");
     } else {
-      setEndDate(date ? date.toISOString().split("T")[0] : "");
+      setEndDate(date ? formatDateToKorean(date) : "");
     }
   };
 

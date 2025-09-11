@@ -9,6 +9,8 @@ import LinkGroupFilter from "@/components/link-group-filter";
 import { LinkIcon, Search, X } from "lucide-react";
 import { useState } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
+import type { BookmarkFilter } from "@/types/link";
+import { formatDateToKorean } from "@/utils/formatDateToKorean";
 
 export default function GroupPage() {
   const { viewMode } = useViewMode();
@@ -18,9 +20,44 @@ export default function GroupPage() {
   // 검색 키워드가 있는지 확인
   const isSearching = debouncedSearchKeyword.trim().length > 0;
 
+  //filter 관련
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [isBookmarked, setIsBookmarked] = useState<BookmarkFilter>("all");
+
+  const handleDateChange = (type: "start" | "end") => (date?: Date) => {
+    if (type === "start") {
+      setStartDate(date ? formatDateToKorean(date) : "");
+    } else {
+      setEndDate(date ? formatDateToKorean(date) : "");
+    }
+  };
+
+  const handleBookmarkedChange = (filterStatus: BookmarkFilter) => {
+    setIsBookmarked(filterStatus);
+  };
+  const getBookmarkedFilter = (): boolean | undefined => {
+    if (isBookmarked === "all") return undefined;
+    return isBookmarked === "bookmarked";
+  };
+  const getStartDateFilter = (): string | undefined => {
+    return startDate.trim() === "" ? undefined : startDate;
+  };
+
+  const getEndDateFilter = (): string | undefined => {
+    return endDate.trim() === "" ? undefined : endDate;
+  };
+
   // 하나의 쿼리로 모든 경우 처리 (빈 키워드일 때는 모든 그룹 반환)
   const { allGroups, hasNextPage, fetchNextPage, isLoading, error } =
-    useGroupPaginationUtils(10, "ASC", debouncedSearchKeyword);
+    useGroupPaginationUtils({
+      take: 10,
+      order: "ASC",
+      keyword: debouncedSearchKeyword,
+      startDate: getStartDateFilter(),
+      endDate: getEndDateFilter(),
+      isBookmarked: getBookmarkedFilter(),
+    });
 
   // 에러 상태
   if (error) {
@@ -70,6 +107,12 @@ export default function GroupPage() {
           value={searchKeyword}
           onChange={setSearchKeyword}
           placeholder="그룹 제목으로 검색..."
+          startDate={startDate ? new Date(startDate) : undefined}
+          endDate={endDate ? new Date(endDate) : undefined}
+          isBookmarked={isBookmarked}
+          onBookmarkedChange={handleBookmarkedChange}
+          onStartDateChange={handleDateChange("start")}
+          onEndDateChange={handleDateChange("end")}
           className="max-w-md"
         />
 

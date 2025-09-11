@@ -7,6 +7,9 @@ type Props = {
   order: "ASC" | "DESC";
   userId?: number;
   keyword: string;
+  startDate?: string;
+  endDate?: string;
+  isBookmarked?: boolean;
 };
 
 export const useUserGroupPaginationQuery = ({
@@ -14,9 +17,20 @@ export const useUserGroupPaginationQuery = ({
   order,
   userId,
   keyword,
+  startDate,
+  endDate,
+  isBookmarked,
 }: Props) => {
   return useInfiniteQuery({
-    queryKey: RQgroupKey.userGroups({ take, order, userId, keyword }),
+    queryKey: RQgroupKey.userGroups({
+      take,
+      order,
+      userId,
+      keyword,
+      startDate,
+      endDate,
+      isBookmarked,
+    }),
     queryFn: ({ pageParam }) => {
       return getUserGroupByPagination({
         userId: userId as number,
@@ -25,6 +39,9 @@ export const useUserGroupPaginationQuery = ({
           id: pageParam ?? 0,
           order,
           keyword,
+          startDate,
+          endDate,
+          isBookmarked,
         },
       });
     },

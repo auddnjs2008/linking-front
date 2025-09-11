@@ -290,30 +290,34 @@ const LinkGroupFilter = memo(function LinkGroupFilter({
             </Select>
           </div>
           {/* 썸네일 필터 */}
-          <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-            <Label
-              htmlFor="thumbnail"
-              className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2"
-            >
-              <Image className="w-4 h-4 text-purple-500" />
-              썸네일 상태
-            </Label>
-            <Select value={hasThumbnail} onValueChange={onThumbnailChange}>
-              <SelectTrigger
-                id="thumbnail"
-                className="w-full h-10 border-gray-300 hover:border-purple-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+          {onThumbnailChange && (
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+              <Label
+                htmlFor="thumbnail"
+                className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2"
               >
-                <SelectValue placeholder="상태 선택" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">전체</SelectItem>
-                <SelectItem value="withThumbnail">썸네일 있는 것만</SelectItem>
-                <SelectItem value="withoutThumbnail">
-                  썸네일 없는 것만
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+                <Image className="w-4 h-4 text-purple-500" />
+                썸네일 상태
+              </Label>
+              <Select value={hasThumbnail} onValueChange={onThumbnailChange}>
+                <SelectTrigger
+                  id="thumbnail"
+                  className="w-full h-10 border-gray-300 hover:border-purple-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                >
+                  <SelectValue placeholder="상태 선택" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">전체</SelectItem>
+                  <SelectItem value="withThumbnail">
+                    썸네일 있는 것만
+                  </SelectItem>
+                  <SelectItem value="withoutThumbnail">
+                    썸네일 없는 것만
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
         {/* 초기화 버튼 - 카드 형태 */}

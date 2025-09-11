@@ -10,6 +10,7 @@ import LinkGroupFilter from "@/components/link-group-filter";
 import { useState } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { BookmarkFilter, ThumbnailFilter } from "@/types/link";
+import { formatDateToKorean } from "@/utils/formatDateToKorean";
 
 export default function Home() {
   const { viewMode } = useViewMode();
@@ -29,9 +30,9 @@ export default function Home() {
 
   const handleDateChange = (type: "start" | "end") => (date?: Date) => {
     if (type === "start") {
-      setStartDate(date ? date.toISOString().split("T")[0] : "");
+      setStartDate(date ? formatDateToKorean(date) : "");
     } else {
-      setEndDate(date ? date.toISOString().split("T")[0] : "");
+      setEndDate(date ? formatDateToKorean(date) : "");
     }
   };
 
