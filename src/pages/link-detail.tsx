@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import { useLinkDetailQuery } from "@/hooks/rqhooks/link/useLinkDetailQuery";
 import { useBookmarkMutation } from "@/hooks/rqhooks/link/useBookmarkMutation";
 import { useUnBookmarkMutation } from "@/hooks/rqhooks/link/useUnBookmarkMutation";
+import CommentSection from "@/components/comment-section";
 
 export default function LinkDetailPage() {
   const params = useParams<{ id: string }>();
@@ -89,36 +90,8 @@ export default function LinkDetailPage() {
             />
           </div>
 
-          {/* 외부 링크 컨텐츠 영역 */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold">
-                External Content Preview
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-gray-50 rounded-lg p-6 border-2 border-dashed border-gray-300">
-                <div className="text-center text-gray-500 mb-4">
-                  <div className="text-2xl mb-2">🔗</div>
-                  <p className="text-sm">
-                    External content will be displayed here
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    This could be an iframe, embedded content, or preview
-                  </p>
-                </div>
-
-                <div className="flex justify-center">
-                  <Button
-                    onClick={() => window.open(linkData?.linkUrl, "_blank")}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    Open External Link
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* 댓글 섹션 */}
+          <CommentSection />
         </div>
 
         {/* 사이드바 */}
