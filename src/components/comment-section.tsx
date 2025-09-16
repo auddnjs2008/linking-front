@@ -1,84 +1,27 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { MessageCircle, Heart, Reply, Edit2, Trash2 } from "lucide-react";
+import { MessageCircle, Reply, Edit2, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
-
-// 임시 댓글 데이터 (실제로는 API에서 가져올 데이터)
-const mockComments = [
-  {
-    id: 1,
-    content:
-      "정말 유용한 링크네요! 특히 React Query 부분이 도움이 많이 되었습니다.",
-    createdAt: "2024-01-15T10:30:00Z",
-    user: {
-      id: 1,
-      name: "김개발",
-      profile:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-    },
-    likes: 12,
-    replies: [
-      {
-        id: 2,
-        content: "저도 그 부분이 정말 좋았어요!",
-        createdAt: "2024-01-15T11:00:00Z",
-        user: {
-          id: 2,
-          name: "박프론트",
-          profile:
-            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-        },
-        likes: 3,
-        replies: [],
-      },
-    ],
-  },
-  {
-    id: 3,
-    content:
-      "이런 자료를 찾고 있었는데 정말 감사합니다. 공유해주셔서 고마워요!",
-    createdAt: "2024-01-14T15:20:00Z",
-    user: {
-      id: 3,
-      name: "이백엔드",
-      profile:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face",
-    },
-    likes: 8,
-    replies: [],
-  },
-];
+import { useParams } from "react-router-dom";
+import { useLinkCommentsQuery } from "@/hooks/rqhooks/linkComment/useLinkCommentsQuery";
+import type { ParentComment, Reply as TReply } from "@/types/comment";
+import { useCreateLinkCommentMutation } from "@/hooks/rqhooks/linkComment/useCreateLinkCommentMutation";
+import { useMeQuery } from "@/hooks/rqhooks/user/useMeQuery";
 
 interface CommentProps {
-  comment: {
-    id: number;
-    content: string;
-    createdAt: string;
-    user: {
-      id: number;
-      name: string;
-      profile: string;
-    };
-    likes: number;
-    replies: CommentProps["comment"][];
-  };
+  comment: ParentComment | TReply;
   isReply?: boolean;
 }
 
 function CommentItem({ comment, isReply = false }: CommentProps) {
-  const [isLiked, setIsLiked] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState(comment.content);
-
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-  };
+  const [editContent, setEditContent] = useState(comment.comment);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -90,7 +33,7 @@ function CommentItem({ comment, isReply = false }: CommentProps) {
   };
 
   const handleCancelEdit = () => {
-    setEditContent(comment.content);
+    setEditContent(comment.comment);
     setIsEditing(false);
   };
 
@@ -139,14 +82,14 @@ function CommentItem({ comment, isReply = false }: CommentProps) {
               </div>
             ) : (
               <p className="text-sm text-gray-700 leading-relaxed">
-                {comment.content}
+                {comment.comment}
               </p>
             )}
           </div>
 
           {!isEditing && (
             <div className="flex items-center gap-4 mt-2 ml-2">
-              <button
+              {/* <button
                 onClick={handleLike}
                 className={`flex items-center gap-1 text-xs transition-colors ${
                   isLiked ? "text-red-500" : "text-gray-500 hover:text-red-500"
@@ -154,7 +97,7 @@ function CommentItem({ comment, isReply = false }: CommentProps) {
               >
                 <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
                 <span>{comment.likes + (isLiked ? 1 : 0)}</span>
-              </button>
+              </button> */}
 
               <button
                 onClick={() => setShowReplyForm(!showReplyForm)}
@@ -182,7 +125,7 @@ function CommentItem({ comment, isReply = false }: CommentProps) {
 
       {/* 답글 폼 */}
       {showReplyForm && (
-        <div className="ml-11 mt-3">
+        <form className="ml-11 mt-3">
           <div className="flex gap-3">
             <Avatar className="w-8 h-8 flex-shrink-0">
               <AvatarFallback>U</AvatarFallback>
@@ -204,39 +147,53 @@ function CommentItem({ comment, isReply = false }: CommentProps) {
               </div>
             </div>
           </div>
-        </div>
+        </form>
       )}
     </div>
   );
 }
 
 export default function CommentSection() {
+  const params = useParams<{ id: string }>();
+  const id = params.id ? parseInt(params.id, 10) : null;
+  const { data: me } = useMeQuery();
+
+  const { data: comments } = useLinkCommentsQuery(id || -1);
+
   const [newComment, setNewComment] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    mutate,
+    isPending: isSubmiting,
+    isSuccess,
+  } = useCreateLinkCommentMutation(id || -1);
 
   const handleSubmitComment = async () => {
-    if (!newComment.trim()) return;
+    if (!newComment.trim() || !id) return;
 
-    setIsSubmitting(true);
-    // 실제로는 API 호출
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setNewComment("");
-    setIsSubmitting(false);
+    mutate({ linkId: id, body: { comment: newComment } });
   };
+
+  useEffect(() => {
+    if (isSuccess) {
+      setNewComment("");
+    }
+  }, [isSuccess]);
 
   return (
     <Card className="mb-8">
       <CardHeader>
         <CardTitle className="text-xl font-semibold flex items-center gap-2">
           <MessageCircle className="w-5 h-5" />
-          댓글 {mockComments.length}개
+          댓글 {comments?.length}개
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* 댓글 작성 폼 */}
-        <div className="space-y-4">
+        <form className="space-y-4">
           <div className="flex gap-3">
             <Avatar className="w-10 h-10 flex-shrink-0">
+              <AvatarImage src={me?.profile} />
               <AvatarFallback>U</AvatarFallback>
             </Avatar>
             <div className="flex-1 space-y-3">
@@ -249,21 +206,21 @@ export default function CommentSection() {
               <div className="flex justify-end">
                 <Button
                   onClick={handleSubmitComment}
-                  disabled={!newComment.trim() || isSubmitting}
+                  disabled={!newComment.trim() || isSubmiting}
                   className="px-6"
                 >
-                  {isSubmitting ? "작성 중..." : "댓글 작성"}
+                  {"댓글 작성"}
                 </Button>
               </div>
             </div>
           </div>
-        </div>
+        </form>
 
         <Separator />
 
         {/* 댓글 목록 */}
         <div className="space-y-6">
-          {mockComments.map((comment) => (
+          {comments?.map((comment) => (
             <div key={comment.id}>
               <CommentItem comment={comment} />
 

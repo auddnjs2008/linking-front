@@ -1,32 +1,28 @@
-export type Comment = {
+import type { Link } from "./link";
+import type { User } from "./user";
+
+export type ParentComment = {
   id: number;
-  content: string;
+  comment: string;
   createdAt: string;
   updatedAt: string;
-  userId: number;
-  linkId: number;
-  user: {
-    id: number;
-    name: string;
-    profile: string;
-  };
-  replies?: Comment[];
-  parentId?: number;
+  version: number;
+  user: User; // 작성자 정보
+  link: Link; // 링크 정보
+  parentComment: null; // 원댓글이므로 null
+  parentCommentId: null; // 원댓글이므로 null
+  replies: Reply[];
 };
 
-export type CreateCommentRequest = {
-  content: string;
-  linkId: number;
-  parentId?: number;
-};
-
-export type UpdateCommentRequest = {
+export type Reply = {
   id: number;
-  content: string;
-};
-
-export type CommentPaginationParams = {
-  linkId: number;
-  page?: number;
-  limit?: number;
+  comment: string;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+  user: User; // 재댓글 작성자 정보
+  link: Link; // 링크 정보
+  parentComment: { id: number; comment: string }; // 부모 댓글 (원댓글)
+  parentCommentId: number; // 부모 댓글 ID
+  replies: [];
 };
