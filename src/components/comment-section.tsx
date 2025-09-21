@@ -12,16 +12,56 @@ import { useLinkCommentsQuery } from "@/hooks/rqhooks/linkComment/useLinkComment
 import type { ParentComment, Reply as TReply } from "@/types/comment";
 import { useCreateLinkCommentMutation } from "@/hooks/rqhooks/linkComment/useCreateLinkCommentMutation";
 import { useMeQuery } from "@/hooks/rqhooks/user/useMeQuery";
+import { useUpdateLinkCommentMutation } from "@/hooks/rqhooks/linkComment/useUpdateLinkCommentMutation";
+import { useDeleteLinkCommentMutation } from "@/hooks/rqhooks/linkComment/useDeleteLinkCommentMutation";
 
 interface CommentProps {
   comment: ParentComment | TReply;
   isReply?: boolean;
+  isReReply?: boolean;
+  linkId: number;
+  commentId: number;
+  parentId?: number;
+  canEdit: boolean;
+  myProfile: string;
 }
 
-function CommentItem({ comment, isReply = false }: CommentProps) {
+function CommentItem({
+  comment,
+  isReply = false,
+  isReReply = false,
+  linkId,
+  commentId,
+  parentId,
+  canEdit,
+  myProfile,
+}: CommentProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.comment);
+
+  const [replyComment, setReplyComment] = useState("");
+  const { mutate, isSuccess } = useCreateLinkCommentMutation();
+  const { mutate: updateMutate } = useUpdateLinkCommentMutation(linkId);
+  const { mutate: deleteMutate } = useDeleteLinkCommentMutation(linkId);
+
+  const handleReplySubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!replyComment.trim()) return;
+
+    const parentCommentId = isReply ? parentId : comment.id;
+    mutate({
+      linkId,
+      body: { parentCommentId, comment: replyComment },
+    });
+  };
+
+  useEffect(() => {
+    if (isSuccess) {
+      setReplyComment("");
+      setShowReplyForm(false);
+    }
+  }, [isSuccess]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -30,11 +70,19 @@ function CommentItem({ comment, isReply = false }: CommentProps) {
   const handleSaveEdit = () => {
     // 실제로는 API 호출
     setIsEditing(false);
+    updateMutate({
+      commentId,
+      body: { parentCommentId: parentId, comment: editContent },
+    });
   };
 
   const handleCancelEdit = () => {
     setEditContent(comment.comment);
     setIsEditing(false);
+  };
+
+  const handleDelete = () => {
+    deleteMutate({ commentId });
   };
 
   return (
@@ -99,48 +147,64 @@ function CommentItem({ comment, isReply = false }: CommentProps) {
                 <span>{comment.likes + (isLiked ? 1 : 0)}</span>
               </button> */}
 
-              <button
-                onClick={() => setShowReplyForm(!showReplyForm)}
-                className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                <Reply className="w-4 h-4" />
-                <span>답글</span>
-              </button>
-
-              <div className="flex items-center gap-1">
+              {!isReReply && (
                 <button
-                  onClick={handleEdit}
-                  className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                  onClick={() => setShowReplyForm(!showReplyForm)}
+                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
                 >
-                  <Edit2 className="w-4 h-4" />
+                  <Reply className="w-4 h-4" />
+                  <span>답글</span>
                 </button>
-                <button className="text-xs text-gray-500 hover:text-red-500 transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
+              )}
+
+              {canEdit && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={handleEdit}
+                    className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="text-xs text-gray-500 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
 
       {/* 답글 폼 */}
-      {showReplyForm && (
-        <form className="ml-11 mt-3">
+      {!isReReply && showReplyForm && (
+        <form onSubmit={handleReplySubmit} className="ml-11 mt-3">
           <div className="flex gap-3">
             <Avatar className="w-8 h-8 flex-shrink-0">
+              <AvatarImage src={myProfile} />
               <AvatarFallback>U</AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <Textarea
+                value={replyComment}
+                onChange={(e) => setReplyComment(e.target.value)}
                 placeholder="답글을 작성하세요..."
                 className="min-h-[80px] resize-none"
               />
               <div className="flex gap-2 mt-2">
-                <Button size="sm">답글 작성</Button>
+                <Button type="submit" size="sm" disabled={!replyComment.trim()}>
+                  답글 작성
+                </Button>
                 <Button
+                  type="button"
                   size="sm"
                   variant="outline"
-                  onClick={() => setShowReplyForm(false)}
+                  onClick={() => {
+                    setShowReplyForm(false);
+                    setReplyComment("");
+                  }}
                 >
                   취소
                 </Button>
@@ -166,9 +230,10 @@ export default function CommentSection() {
     mutate,
     isPending: isSubmiting,
     isSuccess,
-  } = useCreateLinkCommentMutation(id || -1);
+  } = useCreateLinkCommentMutation();
 
-  const handleSubmitComment = async () => {
+  const handleSubmitComment = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (!newComment.trim() || !id) return;
 
     mutate({ linkId: id, body: { comment: newComment } });
@@ -190,11 +255,11 @@ export default function CommentSection() {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* 댓글 작성 폼 */}
-        <form className="space-y-4">
+        <form onSubmit={handleSubmitComment} className="space-y-4">
           <div className="flex gap-3">
             <Avatar className="w-10 h-10 flex-shrink-0">
-              <AvatarImage src={me?.profile} />
-              <AvatarFallback>U</AvatarFallback>
+              <AvatarImage src={me?.profile || ""} alt={me?.name || "User"} />
+              <AvatarFallback>{me?.name?.charAt(0) || "U"}</AvatarFallback>
             </Avatar>
             <div className="flex-1 space-y-3">
               <Textarea
@@ -205,11 +270,11 @@ export default function CommentSection() {
               />
               <div className="flex justify-end">
                 <Button
-                  onClick={handleSubmitComment}
+                  type="submit"
                   disabled={!newComment.trim() || isSubmiting}
                   className="px-6"
                 >
-                  {"댓글 작성"}
+                  {isSubmiting ? "작성 중..." : "댓글 작성"}
                 </Button>
               </div>
             </div>
@@ -222,13 +287,29 @@ export default function CommentSection() {
         <div className="space-y-6">
           {comments?.map((comment) => (
             <div key={comment.id}>
-              <CommentItem comment={comment} />
+              <CommentItem
+                comment={comment}
+                linkId={id ?? -1}
+                commentId={comment.id}
+                myProfile={me?.profile ?? ""}
+                canEdit={me?.id === comment.user.id}
+              />
 
               {/* 답글들 */}
               {comment.replies.length > 0 && (
                 <div className="mt-4 space-y-4">
                   {comment.replies.map((reply) => (
-                    <CommentItem key={reply.id} comment={reply} isReply />
+                    <CommentItem
+                      key={reply.id}
+                      comment={reply}
+                      linkId={id ?? -1}
+                      isReply
+                      isReReply={true}
+                      commentId={reply.id}
+                      parentId={comment.id}
+                      myProfile={me?.profile ?? ""}
+                      canEdit={me?.id === reply.user.id}
+                    />
                   ))}
                 </div>
               )}
