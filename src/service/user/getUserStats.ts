@@ -1,13 +1,19 @@
 import { apiInstance } from "../api";
 
-type ResGetUserStats = {
-  totalLinks: number;
-  totalGroups: number;
-  totalLinkBookmarks: number;
-  totalGroupBookmarks: number;
+type ReqGetUserStats = {
+  id: number;
 };
 
-export const getUserStats = async (): Promise<ResGetUserStats> => {
-  const result = await apiInstance.get<ResGetUserStats>("/user/me/stats");
+type ResGetUserStats = {
+  createdLinkCount: number;
+  createdGroupCount: number;
+  receivedLinkBookmark: number;
+  receivedGroupBookmark: number;
+};
+
+export const getUserStats = async ({
+  id,
+}: ReqGetUserStats): Promise<ResGetUserStats> => {
+  const result = await apiInstance.get<ResGetUserStats>(`/user/${id}/stats`);
   return result.data;
 };

@@ -1,4 +1,4 @@
 export const RQuserKey = {
   me: ["user", "me"],
-  stats: ["user", "stats"],
+  stats: (id: number) => ["user", "stats", id] as const,
 };

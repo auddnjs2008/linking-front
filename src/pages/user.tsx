@@ -19,7 +19,9 @@ import {
 
 export default function UserProfilePage() {
   const { data: user, isLoading: userLoading } = useMeQuery();
-  const { data: stats, isLoading: statsLoading } = useUserStatsQuery();
+  const { data: stats, isLoading: statsLoading } = useUserStatsQuery(
+    user?.id ?? -1
+  );
   const { mutate: updateUser, isPending: isUpdating } = useUpdateUserMutation();
 
   const [isEditingName, setIsEditingName] = useState(false);
@@ -167,7 +169,9 @@ export default function UserProfilePage() {
             <Link className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalLinks || 0}</div>
+            <div className="text-2xl font-bold">
+              {stats?.createdLinkCount || 0}
+            </div>
             <p className="text-xs text-muted-foreground">작성한 링크 개수</p>
           </CardContent>
         </Card>
@@ -178,7 +182,9 @@ export default function UserProfilePage() {
             <FolderOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalGroups || 0}</div>
+            <div className="text-2xl font-bold">
+              {stats?.createdGroupCount || 0}
+            </div>
             <p className="text-xs text-muted-foreground">생성한 그룹 개수</p>
           </CardContent>
         </Card>
@@ -190,7 +196,7 @@ export default function UserProfilePage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats?.totalLinkBookmarks || 0}
+              {stats?.receivedLinkBookmark || 0}
             </div>
             <p className="text-xs text-muted-foreground">받은 링크 북마크 수</p>
           </CardContent>
@@ -203,7 +209,7 @@ export default function UserProfilePage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats?.totalGroupBookmarks || 0}
+              {stats?.receivedGroupBookmark || 0}
             </div>
             <p className="text-xs text-muted-foreground">받은 그룹 북마크 수</p>
           </CardContent>
@@ -265,22 +271,26 @@ export default function UserProfilePage() {
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">총 링크 수</span>
-              <span className="font-semibold">{stats?.totalLinks || 0}</span>
+              <span className="font-semibold">
+                {stats?.createdLinkCount || 0}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">총 그룹 수</span>
-              <span className="font-semibold">{stats?.totalGroups || 0}</span>
+              <span className="font-semibold">
+                {stats?.createdGroupCount || 0}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">총 링크 북마크</span>
               <span className="font-semibold">
-                {stats?.totalLinkBookmarks || 0}
+                {stats?.receivedLinkBookmark || 0}
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">총 그룹 북마크</span>
               <span className="font-semibold">
-                {stats?.totalGroupBookmarks || 0}
+                {stats?.receivedGroupBookmark || 0}
               </span>
             </div>
           </CardContent>
