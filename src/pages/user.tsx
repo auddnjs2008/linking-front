@@ -16,17 +16,22 @@ import {
   Bookmark,
   Users,
 } from "lucide-react";
+import { toast } from "sonner";
+import { useUploadProfileMutation } from "@/hooks/rqhooks/user/useUploadProfileMutation";
 
 export default function UserProfilePage() {
   const { data: user, isLoading: userLoading } = useMeQuery();
   const { data: stats, isLoading: statsLoading } = useUserStatsQuery(
     user?.id ?? -1
   );
-  const { mutate: updateUser, isPending: isUpdating } = useUpdateUserMutation();
+  const { mutate: updateUser, isPending: isUpdating } = useUpdateUserMutation(
+    user?.id ?? -1
+  );
+
+  const { mutate: uploadProfile } = useUploadProfileMutation();
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState("");
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
 
   const handleEditName = () => {
     if (user) {
@@ -47,18 +52,34 @@ export default function UserProfilePage() {
     setIsEditingName(false);
   };
 
+  const handleProfileImageClick = () => {
+    const input = document.getElementById(
+      "profile-image-input"
+    ) as HTMLInputElement;
+    input?.click();
+  };
+
   const handleProfileImageChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
     if (file) {
-      // 프로필 이미지 업로드 로직 (실제 구현에서는 파일을 서버에 업로드)
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        updateUser({ profile: result });
-      };
-      reader.readAsDataURL(file);
+      // 파일 크기 검증 (5MB 제한)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("파일 크기는 5MB 이하여야 합니다.");
+        return;
+      }
+
+      // 파일 타입 검증
+      if (!file.type.startsWith("image/")) {
+        toast.error("이미지 파일만 업로드 가능합니다.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.set("file", file);
+
+      uploadProfile({ body: formData });
     }
   };
 
@@ -78,27 +99,32 @@ export default function UserProfilePage() {
     );
   }
 
+  // 디버깅용 로그
+  console.log("User profile data:", user);
+
   return (
     <div className="p-6 h-full max-w-4xl mx-auto">
       {/* 프로필 헤더 */}
       <div className="mb-8">
         <div className="flex items-start gap-6">
           {/* 프로필 이미지 */}
-          <div className="relative">
-            <Avatar className="w-24 h-24">
-              <AvatarImage src={user.profile} alt={user.name} />
-              <AvatarFallback className="text-2xl">
-                {user.name.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <Button
-              size="icon"
-              variant="outline"
-              className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full"
-              onClick={() => setIsEditingProfile(true)}
+          <div className="relative group">
+            <div
+              className="relative cursor-pointer"
+              onClick={handleProfileImageClick}
+              title="프로필 이미지 변경"
             >
-              <Camera className="w-4 h-4" />
-            </Button>
+              <Avatar className="w-24 h-24">
+                <AvatarImage src={user.profile} alt={user.name} />
+                <AvatarFallback className="text-2xl bg-blue-100 text-blue-600 font-semibold">
+                  {user.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              {/* 호버 시 오버레이 */}
+              <div className="absolute inset-0 rounded-full group-hover:bg-black bg-opacity-0 group-hover:bg-opacity-50 flex items-center justify-center transition-all duration-200">
+                <Camera className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+              </div>
+            </div>
             <input
               type="file"
               accept="image/*"
@@ -106,13 +132,6 @@ export default function UserProfilePage() {
               id="profile-image-input"
               onChange={handleProfileImageChange}
             />
-            {isEditingProfile && (
-              <label
-                htmlFor="profile-image-input"
-                className="absolute inset-0 cursor-pointer"
-                onClick={() => setIsEditingProfile(false)}
-              />
-            )}
           </div>
 
           {/* 사용자 정보 */}

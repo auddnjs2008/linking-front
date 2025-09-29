@@ -1,20 +1,13 @@
+import { uploadProfile } from "@/service/user/uploadProfile";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateUser } from "@/service/user/updateUser";
 import { RQuserKey } from "./RQuserKey";
 import { toast } from "sonner";
 
-type UpdateUserData = {
-  name?: string;
-  profile?: string;
-};
-
-export const useUpdateUserMutation = (id: number) => {
+export const useUploadProfileMutation = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: (data: UpdateUserData) => updateUser({ id, body: data }),
+    mutationFn: uploadProfile,
     onSuccess: () => {
-      // 유저 정보 쿼리 무효화하여 최신 데이터 가져오기
       queryClient.invalidateQueries({ queryKey: RQuserKey.me });
       toast.success("프로필이 성공적으로 업데이트되었습니다.");
     },

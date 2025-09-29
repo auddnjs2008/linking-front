@@ -1,6 +1,7 @@
 import { apiInstance } from "../api";
 
 type ReqUpdateUser = {
+  id: number;
   body: {
     name?: string;
     profile?: string;
@@ -20,6 +21,9 @@ type ResUpdateUser = {
 export const updateUser = async (
   req: ReqUpdateUser
 ): Promise<ResUpdateUser> => {
-  const result = await apiInstance.patch<ResUpdateUser>("/user/me", req.body);
+  const result = await apiInstance.patch<ResUpdateUser>(
+    `/user/${req.id}`,
+    req.body
+  );
   return result.data;
 };
