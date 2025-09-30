@@ -57,7 +57,6 @@ export default function LinkDetailPage() {
               <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
                 {linkData?.tags[0]}
               </span>
-              <span className="text-gray-500 text-sm">linkData.readTime</span>
             </div>
 
             <h1 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
@@ -136,10 +135,6 @@ export default function LinkDetailPage() {
                   <span className="font-medium">
                     {linkData?.createdAt.split("T")[0]}
                   </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Read time</span>
-                  <span className="font-medium">"linkData.readTime"</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Category</span>

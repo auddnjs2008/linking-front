@@ -10,6 +10,7 @@ export const useDeleteLinkMutation = () => {
       queryClient.invalidateQueries({
         queryKey: ["link", "cursor-pagination"],
       });
+      queryClient.invalidateQueries({ queryKey: ["user", "stats"] });
     },
   });
 };

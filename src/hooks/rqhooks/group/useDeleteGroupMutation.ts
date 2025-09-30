@@ -10,6 +10,7 @@ export const useDeleteGroupMutation = () => {
       queryClient.invalidateQueries({
         queryKey: ["group", "cursor-pagination"],
       });
+      queryClient.invalidateQueries({ queryKey: ["user", "stats"] });
     },
   });
 };

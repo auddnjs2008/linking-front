@@ -9,6 +9,7 @@ export const useCreateLinkMutation = () => {
     mutationFn: createLink,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["link"] });
+      queryClient.invalidateQueries({ queryKey: ["user", "stats"] });
       toast.success("링크가 생성되었습니다.");
     },
   });

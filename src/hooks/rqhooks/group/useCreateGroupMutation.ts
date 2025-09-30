@@ -8,6 +8,7 @@ export const useCreateGroupMutation = (onClose?: () => void) => {
     mutationFn: createGroup,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["group"] });
+      queryClient.invalidateQueries({ queryKey: ["user", "stats"] });
       toast.success("그룹이 생성되었습니다.");
       onClose?.();
     },
