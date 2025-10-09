@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { InlineSpinner } from "./ui/spinner";
+import TagSearchInput from "./tag-search-input";
 
 type Inputs = {
   title: string;
@@ -88,9 +89,9 @@ export default function LinkActionModal({
 
   const [tagInput, setTagInput] = useState("");
 
-  const addTag = () => {
+  const addTag = (tagName: string) => {
     const currentTags = watch("tags");
-    const trimmedTag = tagInput.trim();
+    const trimmedTag = tagName.trim();
 
     if (trimmedTag && !currentTags.includes(trimmedTag)) {
       if (currentTags.length >= 10) {
@@ -116,13 +117,6 @@ export default function LinkActionModal({
       "tags",
       currentTags.filter((_, i) => i !== index)
     );
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      addTag();
-    }
   };
 
   const handleFormSubmit = (data: Inputs) => {
@@ -185,24 +179,13 @@ export default function LinkActionModal({
             <div className="grid flex-1 gap-2">
               <Label htmlFor="tags">Tags</Label>
               <div className="space-y-2">
-                <div className="flex gap-2">
-                  <Input
-                    id="tags"
-                    placeholder="Enter a tag and press Enter"
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    disabled={currentTags.length >= 10}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={addTag}
-                    disabled={!tagInput.trim() || currentTags.length >= 10}
-                  >
-                    Add
-                  </Button>
-                </div>
+                <TagSearchInput
+                  value={tagInput}
+                  onChange={setTagInput}
+                  onAddTag={addTag}
+                  disabled={currentTags.length >= 10}
+                  placeholder="Search tags or create new..."
+                />
 
                 {currentTags.length >= 10 && (
                   <p className="text-amber-600 text-sm">
