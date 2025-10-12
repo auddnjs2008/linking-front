@@ -11,6 +11,7 @@ type Props = {
   endDate?: string;
   isBookmarked?: boolean;
   hasThumbnail?: boolean;
+  tagKeyword?: string;
 };
 
 export const useUserLinkPaginationQuery = ({

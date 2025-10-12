@@ -10,6 +10,7 @@ type ReqGetSearchLinkByPagination = {
   endDate?: string;
   isBookmarked?: boolean;
   hasThumbnail?: boolean;
+  tagKeyword?: string;
 };
 
 type ResGetSearchLinkByPagination = {

@@ -113,7 +113,6 @@ export default function GroupPage() {
           onBookmarkedChange={handleBookmarkedChange}
           onStartDateChange={handleDateChange("start")}
           onEndDateChange={handleDateChange("end")}
-          className="max-w-md"
         />
 
         <p className="text-gray-600 mt-2">

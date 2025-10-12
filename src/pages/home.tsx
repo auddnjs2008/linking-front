@@ -27,6 +27,7 @@ export default function Home() {
 
   const [isBookmarked, setIsBookmarked] = useState<BookmarkFilter>("all");
   const [hasThumbnail, setHasThumbnail] = useState<ThumbnailFilter>("all");
+  const [tagFilter, setTagFilter] = useState<string | undefined>();
 
   const handleDateChange = (type: "start" | "end") => (date?: Date) => {
     if (type === "start") {
@@ -42,6 +43,10 @@ export default function Home() {
 
   const handleThumbnailChange = (filterStatus: ThumbnailFilter) => {
     setHasThumbnail(filterStatus);
+  };
+
+  const handleTagFilterChange = (tagKeyword: string | undefined) => {
+    setTagFilter(tagKeyword);
   };
 
   // 필터 상태를 적절한 타입으로 변환
@@ -73,6 +78,7 @@ export default function Home() {
       endDate: getEndDateFilter(),
       isBookmarked: getBookmarkedFilter(),
       hasThumbnail: getThumbnailFilter(),
+      tagKeyword: tagFilter,
     });
 
   // 에러 상태
@@ -126,11 +132,12 @@ export default function Home() {
           endDate={endDate ? new Date(endDate) : undefined}
           hasThumbnail={hasThumbnail}
           isBookmarked={isBookmarked}
+          tagKeyword={tagFilter}
           onBookmarkedChange={handleBookmarkedChange}
           onStartDateChange={handleDateChange("start")}
           onEndDateChange={handleDateChange("end")}
           onThumbnailChange={handleThumbnailChange}
-          className="max-w-md"
+          onTagFilterChange={handleTagFilterChange}
         />
 
         <p className="text-gray-600 mt-2">

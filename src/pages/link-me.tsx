@@ -185,7 +185,6 @@ export default function LinkMe() {
           onStartDateChange={handleDateChange("start")}
           onEndDateChange={handleDateChange("end")}
           onThumbnailChange={handleThumbnailChange}
-          className="max-w-md"
         />
 
         <p className="text-gray-600 mt-2">

@@ -12,6 +12,7 @@ type ReqGetUserLinkByPagination = {
     endDate?: string;
     isBookmarked?: boolean;
     hasThumbnail?: boolean;
+    tagKeyword?: string;
   };
 };
 
