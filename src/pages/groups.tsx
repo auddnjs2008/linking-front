@@ -24,6 +24,7 @@ export default function GroupPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [isBookmarked, setIsBookmarked] = useState<BookmarkFilter>("all");
+  const [createdByMeFilter, setCreatedByMeFilter] = useState(false);
 
   const handleDateChange = (type: "start" | "end") => (date?: Date) => {
     if (type === "start") {
@@ -36,6 +37,10 @@ export default function GroupPage() {
   const handleBookmarkedChange = (filterStatus: BookmarkFilter) => {
     setIsBookmarked(filterStatus);
   };
+  const handleCreatedByMeFilterChange = (checked: boolean) => {
+    setCreatedByMeFilter(checked);
+  };
+
   const getBookmarkedFilter = (): boolean | undefined => {
     if (isBookmarked === "all") return undefined;
     return isBookmarked === "bookmarked";
@@ -57,6 +62,7 @@ export default function GroupPage() {
       startDate: getStartDateFilter(),
       endDate: getEndDateFilter(),
       isBookmarked: getBookmarkedFilter(),
+      createdByMe: createdByMeFilter,
     });
 
   // 에러 상태
@@ -110,9 +116,11 @@ export default function GroupPage() {
           startDate={startDate ? new Date(startDate) : undefined}
           endDate={endDate ? new Date(endDate) : undefined}
           isBookmarked={isBookmarked}
+          createdByMe={createdByMeFilter}
           onBookmarkedChange={handleBookmarkedChange}
           onStartDateChange={handleDateChange("start")}
           onEndDateChange={handleDateChange("end")}
+          onCreatedByMeChange={handleCreatedByMeFilterChange}
         />
 
         <p className="text-gray-600 mt-2">

@@ -9,6 +9,7 @@ type ReqGetGroupByPagination = {
   endDate?: string;
   isBookmarked?: boolean;
   hasThumbnail?: boolean;
+  createdByMe?: boolean;
 };
 
 type ResGetGroupByPagination = {

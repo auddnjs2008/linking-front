@@ -12,6 +12,7 @@ import { memo, useState } from "react";
 import { Button } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Calendar } from "./ui/calendar";
+import { Checkbox } from "./ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -33,6 +34,9 @@ interface LinkGroupFilterProps {
   onThumbnailChange?: (value: ThumbnailFilter) => void;
   tagKeyword?: string;
   onTagFilterChange?: (value: string | undefined) => void;
+  // 내가 생성한 글만 보기
+  createdByMe?: boolean;
+  onCreatedByMeChange?: (value: boolean) => void;
 
   // 날짜 필터들
   startDate?: Date | undefined;
@@ -53,6 +57,8 @@ const LinkGroupFilter = memo(function LinkGroupFilter({
   onThumbnailChange,
   tagKeyword,
   onTagFilterChange,
+  createdByMe = false,
+  onCreatedByMeChange,
   startDate,
   onStartDateChange,
   endDate,
@@ -68,6 +74,7 @@ const LinkGroupFilter = memo(function LinkGroupFilter({
       value.trim() !== "" ||
       isBookmarked !== "all" ||
       hasThumbnail !== "all" ||
+      createdByMe === true ||
       startDate !== undefined ||
       endDate !== undefined ||
       tagKeyword !== undefined
@@ -101,6 +108,14 @@ const LinkGroupFilter = memo(function LinkGroupFilter({
         key: "thumbnail",
         label: `썸네일: ${label}`,
         onRemove: () => onThumbnailChange?.("all"),
+      });
+    }
+
+    if (createdByMe) {
+      tags.push({
+        key: "createdByMe",
+        label: "내가 만든 것만",
+        onRemove: () => onCreatedByMeChange?.(false),
       });
     }
 
@@ -226,6 +241,25 @@ const LinkGroupFilter = memo(function LinkGroupFilter({
             </SelectContent>
           </Select>
         </div>
+
+        {/* 내가 만든 것만 */}
+        {onCreatedByMeChange && (
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="createdByMe"
+              checked={createdByMe}
+              onCheckedChange={(checked) =>
+                onCreatedByMeChange(Boolean(checked))
+              }
+            />
+            <label
+              htmlFor="createdByMe"
+              className="text-xs text-gray-600 whitespace-nowrap select-none"
+            >
+              내가 만든 것만
+            </label>
+          </div>
+        )}
 
         {/* 썸네일 필터 */}
         {onThumbnailChange && (

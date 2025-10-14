@@ -5,7 +5,8 @@ export const RQgroupKey = {
     keyword: string,
     startDate?: string,
     endDate?: string,
-    isBookmarked?: boolean
+    isBookmarked?: boolean,
+    createdByMe?: boolean
   ) =>
     [
       "group",
@@ -16,6 +17,7 @@ export const RQgroupKey = {
       startDate,
       endDate,
       isBookmarked,
+      createdByMe,
     ] as const,
   userGroups: ({
     take,

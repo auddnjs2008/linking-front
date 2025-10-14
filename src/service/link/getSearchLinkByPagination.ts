@@ -11,6 +11,7 @@ type ReqGetSearchLinkByPagination = {
   isBookmarked?: boolean;
   hasThumbnail?: boolean;
   tagKeyword?: string;
+  createdByMe?: boolean;
 };
 
 type ResGetSearchLinkByPagination = {

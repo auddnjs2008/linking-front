@@ -10,7 +10,8 @@ export const RQlinkKey = {
     endDate?: string,
     isBookmarked?: boolean,
     hasThumbnail?: boolean,
-    tagKeyword?: string
+    tagKeyword?: string,
+    createdByMe?: boolean
   ) =>
     [
       "link",
@@ -23,6 +24,7 @@ export const RQlinkKey = {
       isBookmarked,
       hasThumbnail,
       tagKeyword,
+      createdByMe,
     ] as const,
 
   userLinks: ({

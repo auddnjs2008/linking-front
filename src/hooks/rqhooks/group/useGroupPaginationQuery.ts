@@ -9,6 +9,7 @@ type Props = {
   startDate?: string;
   endDate?: string;
   isBookmarked?: boolean;
+  createdByMe?: boolean;
 };
 
 export const useGropuPaginationQuery = ({
@@ -18,6 +19,7 @@ export const useGropuPaginationQuery = ({
   startDate,
   endDate,
   isBookmarked,
+  createdByMe,
 }: Props) => {
   return useInfiniteQuery({
     queryKey: RQgroupKey.groups(
@@ -26,7 +28,8 @@ export const useGropuPaginationQuery = ({
       keyword,
       startDate,
       endDate,
-      isBookmarked
+      isBookmarked,
+      createdByMe
     ),
     queryFn: ({ pageParam }) =>
       getGroupByPagination({
@@ -37,6 +40,7 @@ export const useGropuPaginationQuery = ({
         startDate,
         endDate,
         isBookmarked,
+        createdByMe,
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
@@ -51,6 +55,7 @@ export const useGroupPaginationUtils = ({
   startDate,
   endDate,
   isBookmarked,
+  createdByMe,
 }: Props) => {
   const query = useGropuPaginationQuery({
     take,
@@ -59,6 +64,7 @@ export const useGroupPaginationUtils = ({
     startDate,
     endDate,
     isBookmarked,
+    createdByMe,
   });
 
   const allGroups = query.data?.pages.flatMap((page) => page.data) ?? [];

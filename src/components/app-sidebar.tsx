@@ -1,4 +1,4 @@
-import { Archive, Folder, Home, Inbox, User } from "lucide-react";
+import { Folder, Home, User } from "lucide-react";
 
 import {
   Sidebar,
@@ -16,26 +16,26 @@ import { cn } from "@/lib/utils";
 // Menu items.
 export const menuItems = [
   {
-    title: "Home",
+    title: "Links",
     url: "/",
     icon: Home,
   },
-  {
-    title: "MyLinks",
-    url: "/links/me",
-    icon: Inbox,
-  },
+  // {
+  //   title: "MyLinks",
+  //   url: "/links/me",
+  //   icon: Inbox,
+  // },
   {
     title: "Groups",
     url: "/groups",
     icon: Folder,
   },
 
-  {
-    title: "MyGroups",
-    url: "/groups/me",
-    icon: Archive,
-  },
+  // {
+  //   title: "MyGroups",
+  //   url: "/groups/me",
+  //   icon: Archive,
+  // },
   {
     title: "Profile",
     url: "/user",
