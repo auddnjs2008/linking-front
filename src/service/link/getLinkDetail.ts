@@ -10,6 +10,7 @@ type ResGetLinkDetail = {
   linkUrl: string;
   thumbnail: string;
   description: string;
+  views: number;
   user: {
     id: number;
     name: string;

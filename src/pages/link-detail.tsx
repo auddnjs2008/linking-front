@@ -6,6 +6,7 @@ import { useLinkDetailQuery } from "@/hooks/rqhooks/link/useLinkDetailQuery";
 import { useBookmarkMutation } from "@/hooks/rqhooks/link/useBookmarkMutation";
 import { useUnBookmarkMutation } from "@/hooks/rqhooks/link/useUnBookmarkMutation";
 import CommentSection from "@/components/comment-section";
+import { EyeIcon } from "lucide-react";
 
 export default function LinkDetailPage() {
   const params = useParams<{ id: string }>();
@@ -53,10 +54,16 @@ export default function LinkDetailPage() {
         <div className="lg:col-span-2">
           {/* 헤더 섹션 */}
           <div className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center justify-between gap-2 mb-4">
               <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
                 {linkData?.tags[0]}
               </span>
+              <div className="flex items-center gap-1.5 text-gray-600">
+                <EyeIcon className="w-4 h-4" />
+                <span className="text-sm font-medium">
+                  {linkData?.views?.toLocaleString() || 0}
+                </span>
+              </div>
             </div>
 
             <h1 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">

@@ -35,6 +35,7 @@ export type ResGetGroupDetail = {
   linkedLinks: LinkedLink[];
   bookmarkedUsers: BookmarkedUser[];
   isBookmarked: boolean;
+  views: number;
 };
 
 export const getGroupDetail = async (req: ReqGetGroupDetail) => {

@@ -1,6 +1,7 @@
 import LinkCard from "@/components/link-card";
 import { useGroupDetailQuery } from "@/hooks/rqhooks/group/useGroupDetailQuery";
 import { useParams } from "react-router-dom";
+import { EyeIcon, Users, Link } from "lucide-react";
 
 export default function GroupDetailPage() {
   const params = useParams<{ id: string }>();
@@ -12,7 +13,7 @@ export default function GroupDetailPage() {
     <div className="p-6 h-full flex flex-col w-full">
       {/* 그룹 헤더 섹션 */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center flex-col justify-between mb-4 sm:flex-row gap-5">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               {groupData?.title}
@@ -21,18 +22,27 @@ export default function GroupDetailPage() {
               {groupData?.description}
             </p>
           </div>
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <div className="text-center">
-              <div className="font-semibold text-gray-900">
-                {groupData?.bookmarkedUsers.length}
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-center gap-1 px-3 py-2 bg-gray-50 rounded-lg min-w-[70px]">
+              <Users className="w-4 h-4 text-gray-600" />
+              <div className="font-bold text-base text-gray-900">
+                {groupData?.bookmarkedUsers.length || 0}
               </div>
-              <div>Members</div>
+              <div className="text-xs text-gray-600">Members</div>
             </div>
-            <div className="text-center">
-              <div className="font-semibold text-gray-900">
-                {groupData?.linkedLinks.length}
+            <div className="flex flex-col items-center gap-1 px-3 py-2 bg-gray-50 rounded-lg min-w-[70px]">
+              <Link className="w-4 h-4 text-gray-600" />
+              <div className="font-bold text-base text-gray-900">
+                {groupData?.linkedLinks.length || 0}
               </div>
-              <div>Links</div>
+              <div className="text-xs text-gray-600">Links</div>
+            </div>
+            <div className="flex flex-col items-center gap-1 px-3 py-2 bg-gray-50 rounded-lg min-w-[70px]">
+              <EyeIcon className="w-4 h-4 text-gray-600" />
+              <div className="font-bold text-base text-gray-900">
+                {groupData?.views?.toLocaleString() || 0}
+              </div>
+              <div className="text-xs text-gray-600">Views</div>
             </div>
           </div>
         </div>
