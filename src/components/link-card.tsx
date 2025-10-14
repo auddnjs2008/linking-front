@@ -55,6 +55,7 @@ export default function LinkCard({
   const handleSeeMore = () => {
     navigate(`/links/${id}`);
   };
+  console.log(tags, "tags");
 
   const queryClient = useQueryClient();
   const { data: currentUser } = useMeQuery();
@@ -89,9 +90,9 @@ export default function LinkCard({
       <>
         <Card
           onClick={handleSeeMore}
-          className="bg-white cursor-pointer rounded-2xl shadow-lg transition-shadow hover:shadow-xl p-0"
+          className="bg-white cursor-pointer rounded-2xl shadow-lg transition-shadow hover:shadow-xl p-0 min-h-40"
         >
-          <div className="flex">
+          <div className="flex h-full">
             {/* 썸네일 */}
             <div className="flex-shrink-0">
               <img
@@ -102,8 +103,8 @@ export default function LinkCard({
             </div>
 
             {/* 콘텐츠 영역 */}
-            <div className="flex-1 flex flex-col">
-              <div className="flex-1 p-4">
+            <div className="flex-1 flex flex-col p-4 min-h-0">
+              <div className="flex flex-col h-full">
                 <div className="flex justify-between items-start mb-2">
                   <CardTitle className="font-bold text-gray-900 text-lg mb-1 truncate flex-1">
                     {title}
@@ -157,13 +158,36 @@ export default function LinkCard({
                     )}
                   </div>
                 </div>
-                <CardDescription className="text-gray-500 text-sm mb-3 line-clamp-2">
-                  {description}
-                </CardDescription>
-                <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
-                  <span>{tags.length} tags</span>
-                  <span>•</span>
-                  <span>{author.name}</span>
+
+                <div className="flex flex-col flex-1 justify-between min-h-0">
+                  <div className="flex-1 overflow-hidden">
+                    <CardDescription className="text-gray-500 text-sm mb-2 line-clamp-2">
+                      {description}
+                    </CardDescription>
+
+                    {/* 태그 표시 */}
+                    {tags.length > 0 && (
+                      <div className="flex items-center gap-1 mb-2 flex-wrap">
+                        {tags.slice(0, 2).map((tag, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-200"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                        {tags.length > 2 && (
+                          <span className="text-xs text-gray-400">
+                            +{tags.length - 2} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm text-gray-500 mt-2">
+                    <span>{author.name}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -189,7 +213,7 @@ export default function LinkCard({
   }
 
   return (
-    <Card className="bg-white rounded-2xl shadow-lg max-w-xs flex flex-col items-stretch transition-shadow hover:shadow-xl p-0">
+    <Card className="bg-white rounded-2xl shadow-lg max-w-xs flex flex-col items-stretch transition-shadow hover:shadow-xl p-0 h-full">
       <CardContent className="p-0">
         <img
           src={thumbnailUrl}
@@ -249,24 +273,48 @@ export default function LinkCard({
         </div>
       </div>
 
-      <CardHeader className="pt-0 pb-2 px-6 ">
-        <CardTitle className="font-bold text-gray-900 text-lg mb-1 truncate">
-          {title}
-        </CardTitle>
-        <CardDescription className="text-gray-500 text-base mb-2 line-clamp-2">
-          {description}
-        </CardDescription>
-      </CardHeader>
-      <CardFooter className="px-6 pb-6 pt-2 flex justify-between">
-        <Button onClick={handleSeeMore}>See more</Button>
-        <div className="flex items-center gap-2">
-          <Avatar>
-            <AvatarImage src={author.profile} alt="@shadcn" />
-            <AvatarFallback>{author.name}</AvatarFallback>
-          </Avatar>
-          <div>{author.name}</div>
-        </div>
-      </CardFooter>
+      {/* 카드 본문 영역 - flex-1로 남은 공간 차지 */}
+      <div className="flex flex-col flex-1 px-6 pt-0 pb-6">
+        <CardHeader className="pt-0 pb-2 px-0 flex-1 flex flex-col">
+          <CardTitle className="font-bold text-gray-900 text-lg mb-1 truncate">
+            {title}
+          </CardTitle>
+          <CardDescription className="text-gray-500 text-base mb-2 line-clamp-2 flex-1">
+            {description}
+          </CardDescription>
+
+          {/* 태그 표시 */}
+          {tags.length > 0 && (
+            <div className="flex items-center gap-1 mb-2 flex-wrap">
+              {tags.slice(0, 2).map((tag, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-200"
+                >
+                  #{tag}
+                </span>
+              ))}
+              {tags.length > 2 && (
+                <span className="text-xs text-gray-400">
+                  +{tags.length - 2} more
+                </span>
+              )}
+            </div>
+          )}
+        </CardHeader>
+
+        {/* 하단 버튼 영역 */}
+        <CardFooter className="px-0 pt-2 pb-0 flex justify-between items-end">
+          <Button onClick={handleSeeMore}>See more</Button>
+          <div className="flex items-center gap-2">
+            <Avatar>
+              <AvatarImage src={author.profile} alt="@shadcn" />
+              <AvatarFallback>{author.name}</AvatarFallback>
+            </Avatar>
+            <div>{author.name}</div>
+          </div>
+        </CardFooter>
+      </div>
       <LinkActionModal
         open={editModalOpen}
         handleClose={() => setEditModalOpen(false)}

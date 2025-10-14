@@ -9,7 +9,8 @@ export const RQlinkKey = {
     startDate?: string,
     endDate?: string,
     isBookmarked?: boolean,
-    hasThumbnail?: boolean
+    hasThumbnail?: boolean,
+    tagKeyword?: string
   ) =>
     [
       "link",
@@ -21,6 +22,7 @@ export const RQlinkKey = {
       endDate,
       isBookmarked,
       hasThumbnail,
+      tagKeyword,
     ] as const,
 
   userLinks: ({
@@ -32,6 +34,7 @@ export const RQlinkKey = {
     endDate,
     isBookmarked,
     hasThumbnail,
+    tagKeyword,
   }: {
     take: number;
     order: "ASC" | "DESC";
@@ -41,6 +44,7 @@ export const RQlinkKey = {
     endDate?: string;
     isBookmarked?: boolean;
     hasThumbnail?: boolean;
+    tagKeyword?: string;
   }) =>
     [
       "link",
@@ -54,6 +58,7 @@ export const RQlinkKey = {
       endDate,
       isBookmarked,
       hasThumbnail,
+      tagKeyword,
     ] as const,
 
   linkDetail: (id: number) => ["link", "detail", id] as const,

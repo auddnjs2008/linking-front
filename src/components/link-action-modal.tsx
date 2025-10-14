@@ -86,7 +86,7 @@ export default function LinkActionModal({
       tags: [],
     },
   });
-
+  console.log(initialData, "initialData");
   const [tagInput, setTagInput] = useState("");
 
   const addTag = (tagName: string) => {

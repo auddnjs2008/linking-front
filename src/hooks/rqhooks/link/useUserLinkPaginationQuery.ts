@@ -23,6 +23,7 @@ export const useUserLinkPaginationQuery = ({
   endDate,
   isBookmarked,
   hasThumbnail,
+  tagKeyword,
 }: Props) => {
   return useInfiniteQuery({
     queryKey: RQlinkKey.userLinks({
@@ -34,6 +35,7 @@ export const useUserLinkPaginationQuery = ({
       endDate,
       isBookmarked,
       hasThumbnail,
+      tagKeyword,
     }),
     queryFn: ({ pageParam }) => {
       // enabled 옵션으로 userId가 있을 때만 실행되므로 안전
@@ -48,6 +50,7 @@ export const useUserLinkPaginationQuery = ({
           endDate,
           isBookmarked,
           hasThumbnail,
+          tagKeyword,
         },
       });
     },

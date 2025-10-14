@@ -21,6 +21,7 @@ export const useSearchLinkPaginationQuery = ({
   endDate,
   isBookmarked,
   hasThumbnail,
+  tagKeyword,
 }: Props) => {
   return useInfiniteQuery({
     queryKey: RQlinkKey.searchLinks(
@@ -30,7 +31,8 @@ export const useSearchLinkPaginationQuery = ({
       startDate,
       endDate,
       isBookmarked,
-      hasThumbnail
+      hasThumbnail,
+      tagKeyword
     ),
     queryFn: ({ pageParam }) =>
       getSearchLinkByPagination({
@@ -42,6 +44,7 @@ export const useSearchLinkPaginationQuery = ({
         endDate,
         isBookmarked,
         hasThumbnail,
+        tagKeyword,
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
@@ -58,6 +61,7 @@ export const useSearchLinkPaginationUtils = ({
   endDate,
   isBookmarked,
   hasThumbnail,
+  tagKeyword,
 }: Props) => {
   const query = useSearchLinkPaginationQuery({
     take,
@@ -67,6 +71,7 @@ export const useSearchLinkPaginationUtils = ({
     endDate,
     isBookmarked,
     hasThumbnail,
+    tagKeyword,
   });
 
   const allLinks = query.data?.pages.flatMap((page) => page.data) ?? [];
