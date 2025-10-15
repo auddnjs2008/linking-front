@@ -12,7 +12,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import type { BookmarkFilter, ThumbnailFilter } from "@/types/link";
 import { formatDateToKorean } from "@/utils/formatDateToKorean";
 
-export default function Home() {
+export default function LinksPage() {
   const { viewMode } = useViewMode();
   const [searchKeyword, setSearchKeyword] = useState("");
   const debouncedSearchKeyword = useDebounce(searchKeyword, 500);

@@ -1,4 +1,4 @@
-import { Folder, Home, User } from "lucide-react";
+import { Folder, LayoutDashboardIcon, LinkIcon, User } from "lucide-react";
 
 import {
   Sidebar,
@@ -16,9 +16,14 @@ import { cn } from "@/lib/utils";
 // Menu items.
 export const menuItems = [
   {
-    title: "Links",
+    title: "Dashboard",
     url: "/",
-    icon: Home,
+    icon: LayoutDashboardIcon,
+  },
+  {
+    title: "Links",
+    url: "/links",
+    icon: LinkIcon,
   },
   // {
   //   title: "MyLinks",

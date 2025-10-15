@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layout";
-import Home from "@/pages/home";
+import LinksPage from "@/pages/Links";
 import GroupPage from "@/pages/groups";
 import { createBrowserRouter } from "react-router-dom";
 import GroupDetailPage from "@/pages/group-detail";
@@ -9,6 +9,7 @@ import SignIn from "@/pages/signIn";
 import SignUp from "@/pages/signUp";
 import AuthSuccess from "@/pages/auth-success";
 import { AuthFail } from "@/pages/auth-fail";
+import DashboardPage from "@/pages/dashboard";
 
 export const router = createBrowserRouter([
   {
@@ -17,7 +18,11 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <Home />,
+        element: <DashboardPage />,
+      },
+      {
+        path: "/links",
+        element: <LinksPage />,
       },
 
       {
