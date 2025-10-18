@@ -7,15 +7,17 @@ import { Link as LinkIcon, Search, X } from "lucide-react";
 import { useViewMode } from "@/contexts/ViewModeContext";
 import ButtonController from "@/components/button-controller";
 import LinkGroupFilter from "@/components/link-group-filter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { BookmarkFilter, ThumbnailFilter } from "@/types/link";
 import { formatDateToKorean } from "@/utils/formatDateToKorean";
+import { useSearchParams } from "react-router-dom";
 
 export default function LinksPage() {
   const { viewMode } = useViewMode();
   const [searchKeyword, setSearchKeyword] = useState("");
   const debouncedSearchKeyword = useDebounce(searchKeyword, 500);
+  const [searchParams] = useSearchParams();
 
   // 검색 키워드가 있는지 확인
   const isSearching = debouncedSearchKeyword.trim().length > 0;
@@ -29,6 +31,14 @@ export default function LinksPage() {
   const [hasThumbnail, setHasThumbnail] = useState<ThumbnailFilter>("all");
   const [tagFilter, setTagFilter] = useState<string | undefined>();
   const [createdByMeFilter, setCreatedByMeFilter] = useState(false);
+
+  // URL 쿼리 파라미터의 tag가 있으면 tagFilter에 설정
+  useEffect(() => {
+    const tagFromUrl = searchParams.get("tag");
+    if (tagFromUrl) {
+      setTagFilter(tagFromUrl);
+    }
+  }, [searchParams]);
 
   const handleDateChange = (type: "start" | "end") => (date?: Date) => {
     if (type === "start") {

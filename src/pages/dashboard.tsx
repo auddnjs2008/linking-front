@@ -10,93 +10,38 @@ import {
   FolderOpen,
   Calendar,
 } from "lucide-react";
+import { useDashboardStatsQuery } from "@/hooks/rqhooks/stat/useDashboardStatsQuery";
+import { usePopularLinkQuery } from "@/hooks/rqhooks/link/usePopularLinkQuery";
+import { usePopularGroupsQuery } from "@/hooks/rqhooks/group/usePopularGroupQuery";
+import { usePopularTagQuery } from "@/hooks/rqhooks/tag/usePopularTagQuery";
+import { useNavigate } from "react-router-dom";
 
 export default function DashboardPage() {
-  // Mock data - 실제로는 API에서 가져올 데이터
-  const popularLinks = [
-    {
-      id: 1,
-      title: "React 18 New Features",
-      description:
-        "Complete guide to React 18's new features including concurrent rendering",
-      linkUrl: "https://react.dev",
-      thumbnail: "https://picsum.photos/200/300?random=1",
-      tags: ["React", "JavaScript", "Frontend"],
-      author: {
-        id: 1,
-        name: "John Doe",
-        profile: "https://picsum.photos/50/50?random=1",
-      },
-      isBookmarked: false,
-    },
-    {
-      id: 2,
-      title: "TypeScript Best Practices",
-      description:
-        "Advanced TypeScript patterns and best practices for large applications",
-      linkUrl: "https://typescript.dev",
-      thumbnail: "https://picsum.photos/200/300?random=2",
-      tags: ["TypeScript", "JavaScript", "Development"],
-      author: {
-        id: 2,
-        name: "Jane Smith",
-        profile: "https://picsum.photos/50/50?random=2",
-      },
-      isBookmarked: true,
-    },
-  ];
+  const { data } = useDashboardStatsQuery();
+  const { data: popularLinks } = usePopularLinkQuery();
+  const { data: popularGroups } = usePopularGroupsQuery();
+  const { data: trendingTags } = usePopularTagQuery();
 
-  const popularGroups = [
-    {
-      id: 1,
-      title: "Frontend Development",
-      description: "Collection of the best frontend development resources",
-      linkedLinks: [
-        { id: 1, title: "React Guide" },
-        { id: 2, title: "Vue Tutorial" },
-      ],
-      createdDate: "2024-01-15",
-      author: {
-        id: 1,
-        name: "John Doe",
-        profile: "https://picsum.photos/50/50?random=1",
-      },
-      isBookmarked: false,
-    },
-    {
-      id: 2,
-      title: "Design Resources",
-      description: "Curated design tools and inspiration",
-      linkedLinks: [
-        { id: 3, title: "Figma Tips" },
-        { id: 4, title: "Color Palettes" },
-      ],
-      createdDate: "2024-01-20",
-      author: {
-        id: 2,
-        name: "Jane Smith",
-        profile: "https://picsum.photos/50/50?random=2",
-      },
-      isBookmarked: true,
-    },
-  ];
+  const navigate = useNavigate();
 
-  const trendingTags = [
-    { name: "React", count: 156 },
-    { name: "JavaScript", count: 142 },
-    { name: "TypeScript", count: 98 },
-    { name: "Design", count: 87 },
-    { name: "Frontend", count: 76 },
-    { name: "Vue", count: 65 },
-    { name: "CSS", count: 54 },
-    { name: "Node.js", count: 43 },
-  ];
+  const handleLinkRoute = () => {
+    navigate("/links");
+  };
 
-  const globalStats = {
-    totalLinks: 1247,
-    totalGroups: 89,
-    totalUsers: 234,
-    todayLinks: 23,
+  const handleLinkDetailRoute = (id: number) => {
+    navigate(`/links/${id}`);
+  };
+
+  const handleGroupRoute = () => {
+    navigate("/groups");
+  };
+
+  const handleGroupDetailRoute = (id: number) => {
+    navigate(`/groups/${id}`);
+  };
+
+  const handleTagClick = (tag: string) => {
+    navigate(`/links?tag=${encodeURIComponent(tag)}`);
   };
 
   return (
@@ -118,7 +63,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {globalStats.totalLinks.toLocaleString()}
+              {data?.totalLinks.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">전체 저장된 링크</p>
           </CardContent>
@@ -131,7 +76,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {globalStats.totalGroups.toLocaleString()}
+              {data?.totalGroups.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">생성된 그룹</p>
           </CardContent>
@@ -144,7 +89,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {globalStats.totalUsers.toLocaleString()}
+              {data?.totalUsers.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">가입한 사용자</p>
           </CardContent>
@@ -156,7 +101,7 @@ export default function DashboardPage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{globalStats.todayLinks}</div>
+            <div className="text-2xl font-bold">{data?.addedToday}</div>
             <p className="text-xs text-muted-foreground">오늘 추가된 링크</p>
           </CardContent>
         </Card>
@@ -172,15 +117,16 @@ export default function DashboardPage() {
                 🔥 인기 링크
               </CardTitle>
             </div>
-            <Button variant="outline" size="sm">
+            <Button onClick={handleLinkRoute} variant="outline" size="sm">
               더 보기
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
-            {popularLinks.map((link) => (
+            {popularLinks?.map((link) => (
               <div
+                onClick={() => handleLinkDetailRoute(link.id)}
                 key={link.id}
-                className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors"
+                className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
               >
                 <img
                   src={link.thumbnail}
@@ -197,11 +143,11 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2 mt-2">
                     <div className="flex items-center gap-1 text-xs text-gray-500">
                       <Eye className="w-3 h-3" />
-                      <span>1,234</span>
+                      <span>{link.views}</span>
                     </div>
                     <div className="flex items-center gap-1 text-xs text-gray-500">
                       <Bookmark className="w-3 h-3" />
-                      <span>89</span>
+                      <span>{link.bookmarkedUsers.length}</span>
                     </div>
                   </div>
                 </div>
@@ -219,15 +165,16 @@ export default function DashboardPage() {
                 📁 인기 그룹
               </CardTitle>
             </div>
-            <Button variant="outline" size="sm">
+            <Button onClick={handleGroupRoute} variant="outline" size="sm">
               더 보기
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
-            {popularGroups.map((group) => (
+            {popularGroups?.map((group) => (
               <div
                 key={group.id}
-                className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors"
+                onClick={() => handleGroupDetailRoute(group.id)}
+                className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
               >
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
                   <FolderOpen className="w-6 h-6 text-blue-600" />
@@ -246,7 +193,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-center gap-1 text-xs text-gray-500">
                       <Users className="w-3 h-3" />
-                      <span>24명</span>
+                      <span>{group.bookmarkedUsers.length}</span>
                     </div>
                   </div>
                 </div>
@@ -271,10 +218,11 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {trendingTags.map((tag, index) => (
+            {trendingTags?.map((tag, index) => (
               <Button
                 key={tag.name}
                 variant="outline"
+                onClick={() => handleTagClick(tag.name)}
                 size="sm"
                 className={`h-8 px-3 text-sm ${
                   index < 3
@@ -283,7 +231,9 @@ export default function DashboardPage() {
                 }`}
               >
                 #{tag.name}
-                <span className="ml-1 text-xs opacity-70">({tag.count})</span>
+                <span className="ml-1 text-xs opacity-70">
+                  ({tag.usageCount})
+                </span>
               </Button>
             ))}
           </div>

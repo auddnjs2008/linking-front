@@ -19,6 +19,7 @@ export const RQgroupKey = {
       isBookmarked,
       createdByMe,
     ] as const,
+  popularGroups: ["group", "popular"] as const,
   userGroups: ({
     take,
     order,
