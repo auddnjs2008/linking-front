@@ -99,9 +99,6 @@ export default function UserProfilePage() {
     );
   }
 
-  // 디버깅용 로그
-  console.log("User profile data:", user);
-
   return (
     <div className="p-6 h-full max-w-4xl mx-auto">
       {/* 프로필 헤더 */}

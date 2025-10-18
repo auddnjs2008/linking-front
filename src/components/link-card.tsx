@@ -55,7 +55,6 @@ export default function LinkCard({
   const handleSeeMore = () => {
     navigate(`/links/${id}`);
   };
-  console.log(tags, "tags");
 
   const queryClient = useQueryClient();
   const { data: currentUser } = useMeQuery();
