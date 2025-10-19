@@ -73,7 +73,7 @@ export const useUnBookmarkMutation = () => {
 
       return { previousQueries };
     },
-    onError: (err, data, context) => {
+    onError: (_, __, context) => {
       // 에러 발생 시 이전 데이터로 롤백
       if (context?.previousQueries) {
         Object.entries(context.previousQueries).forEach(

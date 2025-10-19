@@ -47,7 +47,7 @@ export default function LinkSummaryCard({
             <Checkbox
               checked={isSelected}
               //   onChange={(checked) => onSelect?.(checked)}
-              onClick={(e) => e.stopPropagation()}
+              // onClick={(e) => e.stopPropagation()}
               className="bg-white border-2 border-gray-300 data-[state=checked]:bg-blue-400 data-[state=checked]:border-blue-400 transition-all duration-200"
             />
           </div>

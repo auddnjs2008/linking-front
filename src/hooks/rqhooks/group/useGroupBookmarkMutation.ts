@@ -41,7 +41,7 @@ export const useGroupBookmarkMutation = () => {
         });
       return { previousQueries };
     },
-    onError: (err, data, context) => {
+    onError: (_, __, context) => {
       if (context?.previousQueries) {
         Object.entries(context.previousQueries).forEach(
           ([queryKeyStr, data]) => {
