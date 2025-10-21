@@ -12,6 +12,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import type { BookmarkFilter, ThumbnailFilter } from "@/types/link";
 import { formatDateToKorean } from "@/utils/formatDateToKorean";
 import { useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 
 export default function LinksPage() {
   const { viewMode } = useViewMode();
@@ -118,132 +119,138 @@ export default function LinksPage() {
   }
 
   return (
-    <div className="p-6 h-full flex flex-col w-full">
-      {/* 헤더 및 검색 - 항상 렌더링하여 포커스 유지 */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {isSearching
-              ? `"${debouncedSearchKeyword}" 검색 결과`
-              : "모든 링크"}
-          </h2>
-          {isSearching && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSearchKeyword("")}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <X className="w-4 h-4 mr-1" />
-              검색 초기화
-            </Button>
-          )}
-        </div>
-
-        {/* 검색 입력 필드 - 항상 렌더링 */}
-        <LinkGroupFilter
-          value={searchKeyword}
-          onChange={setSearchKeyword}
-          startDate={startDate ? new Date(startDate) : undefined}
-          endDate={endDate ? new Date(endDate) : undefined}
-          hasThumbnail={hasThumbnail}
-          isBookmarked={isBookmarked}
-          tagKeyword={tagFilter}
-          createdByMe={createdByMeFilter}
-          onBookmarkedChange={handleBookmarkedChange}
-          onStartDateChange={handleDateChange("start")}
-          onEndDateChange={handleDateChange("end")}
-          onThumbnailChange={handleThumbnailChange}
-          onTagFilterChange={handleTagFilterChange}
-          onCreatedByMeChange={handleCreatedByMeFilterChange}
-        />
-
-        <p className="text-gray-600 mt-2">
-          {isSearching
-            ? `검색 결과 ${allLinks.length}개의 링크를 찾았습니다`
-            : `총 ${allLinks.length}개의 링크가 있습니다`}
-        </p>
-      </div>
-
-      {/* 로딩 상태 - 인라인으로 처리하여 화면 끊김 방지 */}
-      {isLoading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <Spinner size="lg" className="mx-auto mb-4" />
-            <p className="text-gray-600">
-              {isSearching ? "검색 중..." : "링크를 불러오는 중..."}
-            </p>
-          </div>
-        </div>
-      ) : allLinks.length === 0 ? (
-        /* 빈 상태 메시지 - 인라인으로 처리 */
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center max-w-md">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              {isSearching ? (
-                <Search className="w-10 h-10 text-gray-400" />
-              ) : (
-                <LinkIcon className="w-10 h-10 text-gray-400" />
-              )}
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">
+    <>
+      <Helmet>
+        <title>링크 - Linking</title>
+        <meta name="description" content="모든 링크를 검색하고 관리하세요" />
+      </Helmet>
+      <div className="p-6 h-full flex flex-col w-full">
+        {/* 헤더 및 검색 - 항상 렌더링하여 포커스 유지 */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-gray-900">
               {isSearching
-                ? `"${debouncedSearchKeyword}"에 대한 검색 결과가 없습니다`
-                : "아직 저장된 링크가 없습니다"}
-            </h3>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              {isSearching
-                ? "다른 키워드로 검색해보거나 검색을 초기화해보세요."
-                : "흥미로운 링크를 발견했다면 저장해보세요. 나중에 쉽게 찾아볼 수 있습니다."}
-            </p>
+                ? `"${debouncedSearchKeyword}" 검색 결과`
+                : "모든 링크"}
+            </h2>
             {isSearching && (
               <Button
-                variant="outline"
+                variant="ghost"
+                size="sm"
                 onClick={() => setSearchKeyword("")}
-                className="mr-2"
+                className="text-gray-500 hover:text-gray-700"
               >
+                <X className="w-4 h-4 mr-1" />
                 검색 초기화
               </Button>
             )}
           </div>
-        </div>
-      ) : (
-        /* 링크 목록 - 정상 상태 */
-        <div
-          className={
-            viewMode === "grid"
-              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-              : "flex flex-col gap-3"
-          }
-        >
-          {allLinks.map((link) => (
-            <LinkCard
-              key={link.id}
-              id={link.id}
-              thumbnailUrl={
-                link.thumbnail ??
-                `https://picsum.photos/200/300?random=${link.id}`
-              }
-              title={link.title}
-              description={link.description}
-              author={link.author}
-              isBookmarked={link.isBookmarked}
-              linkUrl={link.linkUrl}
-              tags={link.tags}
-              viewMode={viewMode}
-            />
-          ))}
-          {/* 페이지네이션 옵저버 */}
-          {hasNextPage && (
-            <PaginationObserver
-              hasNextPage={hasNextPage}
-              fetchNextPage={fetchNextPage}
-            />
-          )}
-        </div>
-      )}
 
-      <ButtonController type="link" />
-    </div>
+          {/* 검색 입력 필드 - 항상 렌더링 */}
+          <LinkGroupFilter
+            value={searchKeyword}
+            onChange={setSearchKeyword}
+            startDate={startDate ? new Date(startDate) : undefined}
+            endDate={endDate ? new Date(endDate) : undefined}
+            hasThumbnail={hasThumbnail}
+            isBookmarked={isBookmarked}
+            tagKeyword={tagFilter}
+            createdByMe={createdByMeFilter}
+            onBookmarkedChange={handleBookmarkedChange}
+            onStartDateChange={handleDateChange("start")}
+            onEndDateChange={handleDateChange("end")}
+            onThumbnailChange={handleThumbnailChange}
+            onTagFilterChange={handleTagFilterChange}
+            onCreatedByMeChange={handleCreatedByMeFilterChange}
+          />
+
+          <p className="text-gray-600 mt-2">
+            {isSearching
+              ? `검색 결과 ${allLinks.length}개의 링크를 찾았습니다`
+              : `총 ${allLinks.length}개의 링크가 있습니다`}
+          </p>
+        </div>
+
+        {/* 로딩 상태 - 인라인으로 처리하여 화면 끊김 방지 */}
+        {isLoading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <Spinner size="lg" className="mx-auto mb-4" />
+              <p className="text-gray-600">
+                {isSearching ? "검색 중..." : "링크를 불러오는 중..."}
+              </p>
+            </div>
+          </div>
+        ) : allLinks.length === 0 ? (
+          /* 빈 상태 메시지 - 인라인으로 처리 */
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center max-w-md">
+              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                {isSearching ? (
+                  <Search className="w-10 h-10 text-gray-400" />
+                ) : (
+                  <LinkIcon className="w-10 h-10 text-gray-400" />
+                )}
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                {isSearching
+                  ? `"${debouncedSearchKeyword}"에 대한 검색 결과가 없습니다`
+                  : "아직 저장된 링크가 없습니다"}
+              </h3>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                {isSearching
+                  ? "다른 키워드로 검색해보거나 검색을 초기화해보세요."
+                  : "흥미로운 링크를 발견했다면 저장해보세요. 나중에 쉽게 찾아볼 수 있습니다."}
+              </p>
+              {isSearching && (
+                <Button
+                  variant="outline"
+                  onClick={() => setSearchKeyword("")}
+                  className="mr-2"
+                >
+                  검색 초기화
+                </Button>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* 링크 목록 - 정상 상태 */
+          <div
+            className={
+              viewMode === "grid"
+                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+                : "flex flex-col gap-3"
+            }
+          >
+            {allLinks.map((link) => (
+              <LinkCard
+                key={link.id}
+                id={link.id}
+                thumbnailUrl={
+                  link.thumbnail ??
+                  `https://picsum.photos/200/300?random=${link.id}`
+                }
+                title={link.title}
+                description={link.description}
+                author={link.author}
+                isBookmarked={link.isBookmarked}
+                linkUrl={link.linkUrl}
+                tags={link.tags}
+                viewMode={viewMode}
+              />
+            ))}
+            {/* 페이지네이션 옵저버 */}
+            {hasNextPage && (
+              <PaginationObserver
+                hasNextPage={hasNextPage}
+                fetchNextPage={fetchNextPage}
+              />
+            )}
+          </div>
+        )}
+
+        <ButtonController type="link" />
+      </div>
+    </>
   );
 }
